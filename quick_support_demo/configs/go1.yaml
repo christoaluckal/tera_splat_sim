@@ -1,0 +1,14 @@
+robot:
+  name: go1
+  model: urdf_visual_proxy_contact
+  visual_asset: go1_urdf
+  urdf_path: quick_support_demo/assets/go1/urdf/go1.urdf
+  mass_kg: 12.5
+  payload_kg: 0.0
+  stance_length_m: 0.3762
+  stance_width_m: 0.2535
+  foot_radius_m: 0.035
+  foot_height_m: 0.035
+  body_size_m: [0.62, 0.25, 0.16]
+  body_com_height_m: 0.30
+  start_clearance_m: 0.005

@@ -1,0 +1,31 @@
+{
+  "robot": "spot",
+  "candidate_pose": "rigid",
+  "foot_sinkage_m": [
+    0.0019463696517050266,
+    0.001946370117366314,
+    0.001946372096426785,
+    0.0019463724456727505
+  ],
+  "body_roll_rad": 1.181926662727832e-09,
+  "body_pitch_rad": -3.3962152756326226e-09,
+  "com_height_change_m": -0.00694637108398799,
+  "runtime_s": 11.44079132398474,
+  "selected_candidate": "rigid",
+  "total_cost": 0.7375867702439195,
+  "initial_heightmap_shape": [
+    31,
+    31
+  ],
+  "loaded_heightmap_shape": [
+    31,
+    31
+  ],
+  "residual_heightmap_shape": [
+    31,
+    31
+  ],
+  "max_sinkage_m": 0.0019463724456727505,
+  "mean_sinkage_m": 0.0019463710486888885,
+  "max_abs_tilt_rad": 3.3962152756326226e-09
+}

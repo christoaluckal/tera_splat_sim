@@ -1,0 +1,13 @@
+world:
+  floor_size_m: [3.0, 3.0]
+  gravity_mps2: [0.0, 0.0, -9.81]
+  timestep_s: 0.0005
+  settle_time_s: 3.0
+  settle_velocity_mps: 0.005
+  settle_ang_velocity_radps: 0.01
+
+floor:
+  thickness_m: 0.08
+  density_kgpm3: 1000.0
+  friction: 0.8
+

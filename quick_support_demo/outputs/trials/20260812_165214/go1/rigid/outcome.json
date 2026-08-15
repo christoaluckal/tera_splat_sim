@@ -1,0 +1,31 @@
+{
+  "robot": "go1",
+  "candidate_pose": "rigid",
+  "foot_sinkage_m": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "body_roll_rad": NaN,
+  "body_pitch_rad": NaN,
+  "com_height_change_m": 17.824508314657248,
+  "runtime_s": 7.332146651024232,
+  "selected_candidate": "sand",
+  "total_cost": NaN,
+  "initial_heightmap_shape": [
+    31,
+    31
+  ],
+  "loaded_heightmap_shape": [
+    31,
+    31
+  ],
+  "residual_heightmap_shape": [
+    31,
+    31
+  ],
+  "max_sinkage_m": 0.0,
+  "mean_sinkage_m": 0.0,
+  "max_abs_tilt_rad": NaN
+}

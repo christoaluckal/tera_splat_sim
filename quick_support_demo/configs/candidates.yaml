@@ -1,0 +1,22 @@
+candidates:
+  sand:
+    label: "Closer / deformable"
+    base_xy_m: [0.0, -0.05]
+    view_cost: 0.0
+    path_cost: 0.0
+  rigid:
+    label: "Farther / rigid"
+    base_xy_m: [-1.05, -0.20]
+    view_cost: 0.50
+    path_cost: 0.50
+
+planning:
+  weights:
+    view: 1.0
+    path: 1.0
+    sinkage: 45.0
+    tilt: 3.0
+    uncertainty: 0.0
+  rigid_sinkage_m: 0.0
+  rigid_tilt_rad: 0.0
+  rigid_uncertainty: 0.0

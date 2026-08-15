@@ -1,0 +1,31 @@
+{
+  "robot": "go1",
+  "candidate_pose": "sand",
+  "foot_sinkage_m": [
+    0.01498228870332241,
+    0.016987312585115433,
+    0.01498228870332241,
+    0.016987312585115433
+  ],
+  "body_roll_rad": 0.007160857970837621,
+  "body_pitch_rad": 1.3973350134145351e-18,
+  "com_height_change_m": -0.02099249188645841,
+  "runtime_s": 11.74796512600733,
+  "selected_candidate": "rigid",
+  "total_cost": 0.7859116402427073,
+  "initial_heightmap_shape": [
+    31,
+    31
+  ],
+  "loaded_heightmap_shape": [
+    31,
+    31
+  ],
+  "residual_heightmap_shape": [
+    31,
+    31
+  ],
+  "max_sinkage_m": 0.016987312585115433,
+  "mean_sinkage_m": 0.015984799712896347,
+  "max_abs_tilt_rad": 0.007160857970837621
+}

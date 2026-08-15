@@ -1,0 +1,7 @@
+world_config: quick_support_demo/configs/world.yaml
+terrain_config: quick_support_demo/configs/terrain.yaml
+candidates_config: quick_support_demo/configs/candidates.yaml
+robots:
+  go1: quick_support_demo/configs/go1.yaml
+  spot: quick_support_demo/configs/spot.yaml
+

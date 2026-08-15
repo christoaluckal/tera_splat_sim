@@ -1,0 +1,18 @@
+pit:
+  model: SCM
+  size_m: [1.2, 1.2]
+  grid_spacing_m: 0.01
+  top_elevation_m: 0.0
+
+soil:
+  # Initial values chosen for visible deformation in a quick visual demo.
+  # These are not calibrated real sand parameters.
+  bekker_kphi: 800000.0
+  bekker_kc: 25000.0
+  bekker_n: 1.1
+  mohr_cohesion: 1000.0
+  mohr_friction_deg: 28.0
+  janosi_shear_m: 0.01
+  elastic_k: 20000000.0
+  damping_r: 30000.0
+

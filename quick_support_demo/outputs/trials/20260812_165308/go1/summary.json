@@ -1,0 +1,40 @@
+{
+  "robot": "go1",
+  "selected_candidate": "rigid",
+  "costs": {
+    "rigid": 0.6963668570631489
+  },
+  "outcomes": {
+    "rigid": {
+      "robot": "go1",
+      "candidate_pose": "rigid",
+      "foot_sinkage_m": [
+        0.0010303730377927423,
+        0.0010303728049620986,
+        0.0010303744347766042,
+        0.0010303742019459605
+      ],
+      "body_roll_rad": -8.722149760364883e-10,
+      "body_pitch_rad": -2.4994006150001996e-09,
+      "com_height_change_m": -0.006030373650442233,
+      "runtime_s": 11.718460838979809,
+      "selected_candidate": "rigid",
+      "total_cost": 0.6963668570631489,
+      "initial_heightmap_shape": [
+        31,
+        31
+      ],
+      "loaded_heightmap_shape": [
+        31,
+        31
+      ],
+      "residual_heightmap_shape": [
+        31,
+        31
+      ],
+      "max_sinkage_m": 0.0010303744347766042,
+      "mean_sinkage_m": 0.0010303736198693514,
+      "max_abs_tilt_rad": 2.4994006150001996e-09
+    }
+  }
+}
