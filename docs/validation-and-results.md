@@ -26,16 +26,69 @@ Current test suite:
 | flat SCM initialization | Original zero-height constructor remains unchanged |
 | maneuver phase sequence | Forward, signed turn, forward, and completion commands |
 | maneuver duration | Distance/speed and angle/rate phase timing |
+| orbit ring sampling | Multiple theta levels and unique 360-degree phi samples |
+| explicit orbit azimuths | Irregular phi lists and angle wrapping |
+| camera transform | Rigid OpenGL camera-to-world basis and look direction |
+| pinhole intrinsics | VTK vertical field of view to square-pixel focal lengths |
+| orbit CLI parsers | Comma-separated angle and XYZ validation |
+| metric depth encoding | Float meter depth to uint16 millimeter PNG values |
+| heightfield edge skirt | Terrain boundary is closed down to the pit base |
+| OpenGL-to-COLMAP pose | Camera look direction becomes positive OpenCV Z |
+| COLMAP quaternion round trip | Rotation survives binary-model conversion |
+| RGB-D backprojection | Camera-Z center pixel maps to the expected world point |
+| inverse-depth encoding | Encoded uint16 values match Frankenstein decoding |
 
 Latest verified result:
 
 ```text
-Ran 18 tests
+Ran 29 tests
 OK
 ```
 
 These are unit tests. There is no automated numerical regression test for a
 complete Chrono trial yet.
+
+## RGB-D orbit validation
+
+A real offscreen VTK smoke capture rendered two theta rings and four phi values
+per ring at `320x240`:
+
+- 8 RGB PNG, 8 float32 NPY depth, and 8 uint16 PNG depth frames;
+- all RGB and depth dimensions matched;
+- 8 unique camera-to-world poses;
+- phi values `0`, `90`, `180`, and `270` degrees;
+- theta values `20` and `45` degrees;
+- first-frame valid depth range `1.8434-4.6294 m`;
+- background encoded as `NaN` in NPY and `0` in PNG.
+
+The smoke dataset is `/tmp/tera_splat_rgbd_smoke` and is intentionally outside
+the repository.
+
+## Direct COLMAP and training validation
+
+The 180-view rolling-terrain dataset could not initialize conventional COLMAP
+SfM: only 163 image pairs had verified geometry, no pair had 30 inliers, and
+just 86 images were connected. This is expected for the smooth synthetic
+terrain texture.
+
+The direct exporter instead used the rendered poses and metric depth. COLMAP's
+`model_analyzer` accepted the resulting model with:
+
+| Property | Value |
+|---|---:|
+| registered images | 180 |
+| RGB-D seed points | 223,912 |
+| observations | 223,912 |
+| mean reprojection error | `0.0 px` |
+
+Frankenstein's scene reader loaded all 180 cameras and all seed points. Across
+the first full-resolution depth frame, inverse depth decoded with median
+absolute error `0.000006616` and maximum absolute error `0.000014067`.
+
+The active documented `train_nomask.py` path was then run for one iteration at
+resolution scale 8 with depth enabled, W&B disabled, and densification
+disabled. It initialized 223,912 Gaussians, saved iterations 0 and 1, and
+reported `Training complete`.
 
 ## PyVista temporal validation
 

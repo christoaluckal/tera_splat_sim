@@ -38,6 +38,7 @@ crossing while a synchronized DEM shows `current - initial` elevation.
 | PyVista/VTK PBR video backend | Implemented for Go1 |
 | Native VTK DEM-difference panel | Implemented |
 | VTK DEM difference for mesh-initialized SCM | Implemented |
+| Calibrated multi-ring RGB-D orbit capture | Implemented for final Go1 state |
 | Closed-loop balance controller | Not implemented |
 | Articulated Chrono leg dynamics | Not implemented |
 | ROS 2 command bridge | Not implemented |
@@ -113,7 +114,8 @@ complete system description.
    deformation measurement.
 5. [Robots and locomotion](robots-and-locomotion.md)
    Go1 assets, support proxies, inverse kinematics, velocity gait, independent
-   foot contacts, and the exact limits of the motion model.
+   foot contacts, exact limits of the motion model, and the articulated-Go1
+   replacement specification.
 6. [Rendering and video](rendering-and-video.md)
    Matplotlib, PyVista/VTK, DEM visualization, graphics requirements, and video
    encoding.
@@ -130,6 +132,9 @@ complete system description.
 11. [Roadmap and extensions](roadmap-and-extensions.md)
     Hazard/fall demonstration, articulated dynamics, ROS 2, Genesis MPM, and
     Gaussian scene work.
+12. [Splat RGB-D capture](splat-rgbd-capture.md)
+    Multi-level orbit sampling, RGB/depth formats, intrinsics, poses, and
+    coordinate conventions.
 
 ## Quick start
 
@@ -239,7 +244,7 @@ When documents disagree, use this precedence:
 3. Root [`README.md`](../README.md) as a concise operational introduction.
 4. Root historical or proposal documents.
 
-The date-sensitive verified state in this set is August 15, 2026.
+The date-sensitive verified state in this set is August 16, 2026.
 
 ## Legacy and proposal documents
 

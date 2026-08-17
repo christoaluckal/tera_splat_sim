@@ -251,6 +251,31 @@ ends at `(0.900, -0.249) m`, yaw `0.0 deg`, with mean `29.02 mm` and maximum
 The maneuver is an open-loop command sequence, not path following or feedback
 navigation.
 
+## Splat RGB-D Capture
+
+Add `--splat-output` to a PyVista run to freeze its final state and capture
+calibrated 360-degree RGB-D views:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib-chronos XDG_CACHE_HOME=/tmp/chrono-cache \
+conda run -n chrono_splat python -m quick_support_demo.overlays.make_chrono_3d_video \
+  --robot go1 --renderer pyvista --traverse --rolling-terrain \
+  --duration 11 --fps 6 --smoke \
+  --splat-output quick_support_demo/outputs/splat_datasets/go1_final \
+  --splat-hide-robot \
+  --orbit-theta-deg 15,30,45,60 --orbit-phi-count 36 \
+  --orbit-radius 3.2 --orbit-target 0,0,0.15 \
+  --output quick_support_demo/outputs/videos/go1_capture_source.mp4
+```
+
+The dataset includes RGB PNGs, aligned float32 meter depth, uint16 millimeter
+depth PNGs, camera intrinsics, and OpenGL camera-to-world poses. See
+[`docs/splat-rgbd-capture.md`](docs/splat-rgbd-capture.md) for the complete
+schema, coordinate conventions, direct COLMAP export, and the current
+Frankenstein `train_nomask.py` command. The direct exporter uses known poses
+and RGB-D geometry, so synthetic scenes do not depend on COLMAP feature
+matching finding an initial image pair.
+
 ## Irrlicht Visualizer
 
 The Irrlicht scene script is:

@@ -113,6 +113,7 @@ For each selected robot and candidate:
 | Output | Lateral foot-clearance camera | Implemented |
 | Output | Signed DEM difference | Implemented |
 | Output | Mesh-initialized SCM DEM difference | Implemented |
+| Output | Calibrated final-state RGB-D orbit dataset | Implemented for Go1/PyVista |
 | Integration | ROS 2 | Not implemented |
 | Extension | Genesis MPM | Proposed only |
 | Extension | Gaussian deformation transfer | Proposed only |

@@ -164,6 +164,15 @@ Important flags on `make_chrono_3d_video`:
 | `--second-forward-distance` | `0.90` | Second maneuver segment distance, m |
 | `--difficult-max-tilt-deg` | `14` | Per-axis support-plane tilt limit, deg |
 | `--side-view` | off | Lateral camera for foot height and touchdown inspection |
+| `--splat-output` | none | New directory for calibrated final-state RGB-D orbit views |
+| `--splat-hide-robot` | off | Exclude robot geometry from orbit RGB and depth |
+| `--orbit-theta-deg` | `15,30,45,60` | Comma-separated elevation rings |
+| `--orbit-phi-count` | `36` | Uniform 360-degree azimuth samples per ring |
+| `--orbit-phi-deg` | none | Explicit azimuth list overriding uniform sampling |
+| `--orbit-phi-offset-deg` | `0` | Offset for uniform azimuth samples |
+| `--orbit-radius` | `3.2` | Camera radius in meters |
+| `--orbit-target` | `0,0,0.15` | World-space look-at point in meters |
+| `--orbit-view-angle-deg` | `45` | Vertical field of view |
 | `--smoke` | off | Coarse 35 mm video grid |
 | `--full-res` | default | Configured 10 mm grid |
 
@@ -175,6 +184,10 @@ exclusive. Rolling terrain requires `--traverse`; unlike the rigid-pad mode, it
 supports `--dem-panel` because it owns a deformable SCM surface.
 Forward-turn-forward also requires `--traverse`, requires positive `--vx`, and
 is intentionally rejected with hazard mode.
+Orbit capture requires `--renderer pyvista`, samples the final state at
+`--duration`, and writes RGB PNG, metric float32 depth, uint16 millimeter depth,
+and OpenGL camera-to-world poses. See
+[Splat RGB-D capture](splat-rgbd-capture.md) for the full schema.
 
 ## Parameter-change discipline
 

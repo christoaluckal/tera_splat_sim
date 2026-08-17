@@ -34,7 +34,8 @@ SupportOutcome                  +--> sampled height map
        |                        +--> robot/gait state
        v                        |
 objective_cost                  +--> Matplotlib renderer
-select_candidate                `--> PyVistaFrameRenderer
+select_candidate                +--> PyVistaFrameRenderer
+       |                        `--> final-state RGB-D orbit capture
        |
        v
 JSON + NPY outputs
@@ -123,6 +124,13 @@ active.
   Owns the live simulation/video loop and the Matplotlib renderer.
 - `overlays/pyvista_renderer.py`
   Owns the persistent PyVista/VTK scene and native VTK DEM panel.
+- `overlays/splat_capture.py`
+  Generates spherical camera rings, computes calibrated camera matrices and
+  intrinsics, and persists aligned RGB and metric depth frames.
+- `overlays/export_colmap_from_rgbd.py`
+  Converts the rendered OpenGL poses to COLMAP/OpenCV, back-projects RGB-D seed
+  points, and writes the binary model and calibrated inverse-depth maps used by
+  Frankenstein.
 - `chrono_demo/run_visualizer.py`
   Provides the Chrono Irrlicht interactive experiment.
 
@@ -231,6 +239,12 @@ Matplotlib consumes those values directly. The VTK path packages them in
 `FrameContext` and calls `PyVistaFrameRenderer.render`. The VTK renderer updates
 persistent mesh points, scalar arrays, robot vertices, text, and foot markers,
 then explicitly renders and reads back an RGB frame.
+
+When orbit capture is enabled, the loop samples one final `FrameContext` and
+passes it to a separate single-viewport renderer. `splat_capture.py` changes
+only the camera between views and reads RGB plus positive camera-axis depth
+from each completed render. It writes the same camera-to-world matrix used to
+position every view.
 
 ## Dependency boundaries
 

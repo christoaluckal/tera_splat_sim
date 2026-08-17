@@ -121,6 +121,14 @@ quick_support_demo/outputs/videos/
 The CLI accepts an explicit `--output`. Without one, the 3D renderer generates a
 timestamped filename encoding robot, mass scaling, DEM, and traversal state.
 
+## Splat RGB-D datasets
+
+Final-state multi-orbit captures are written to the explicit
+`--splat-output` directory. They contain aligned RGB PNG, float32 metric depth,
+uint16 millimeter depth, `transforms.json`, and `cameras.json`. See
+[Splat RGB-D capture](splat-rgbd-capture.md) for file and coordinate schemas,
+direct COLMAP export, and the active Frankenstein training command.
+
 ## DEM data interpretation
 
 The video DEM is computed live and is not currently persisted as a per-frame

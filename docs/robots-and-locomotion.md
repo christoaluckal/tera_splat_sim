@@ -124,6 +124,164 @@ Traversal mode:
 - visual legs only;
 - no links, constraints, motors, or force transfer between trunk and feet.
 
+## Articulated Go1 upgrade specification
+
+Replacing the kinematic robot means changing the physical model, not merely
+changing the rendered mesh. The target model has a floating dynamic trunk,
+three physical links per leg, 12 actuated revolute joints, and foot contact
+transmitted through the connected mechanism. Trunk motion and attitude must
+then result from gravity, inertia, joint actuation, and terrain contact rather
+than direct `SetPos` and `SetRot` calls.
+
+### Available URDF data
+
+The included `quick_support_demo/assets/go1/urdf/go1.urdf` contains 46 links
+and 45 joints. Twelve joints are actuated leg revolutes; the remaining joints
+attach the base placeholder, feet, rotors, IMU, cameras, and other sensors as
+fixed children. It provides:
+
+- joint origins and axes;
+- lower and upper angle limits;
+- velocity and effort limits;
+- link masses and centers of mass;
+- full inertia tensors, including products of inertia;
+- primitive collision geometry;
+- visual mesh references.
+
+The installed PyChrono 8 Python bindings do not include `pychrono.parsers`, so
+this URDF cannot be handed to a built-in Python URDF importer. A local importer
+should extend the XML origin, axis, and transform handling already implemented
+in `robot_assets/go1.py`.
+
+The URDF inertial entries sum to approximately `13.100528 kg`, while
+`configs/go1.yaml` currently declares `12.5 kg`. The articulated implementation
+must choose one authoritative mass model. It must not assign the configured
+trunk mass in addition to all URDF link masses. Payload mass and its center of
+mass should be applied explicitly to the trunk.
+
+### Body consolidation
+
+Creating every fixed URDF child as a separate Chrono body would add unnecessary
+weld constraints. Fixed children should instead be merged into their nearest
+moving ancestor:
+
+```text
+trunk + fixed sensors and hip rotors
+4 hip bodies + fixed thigh rotors
+4 thigh bodies + fixed calf rotors
+4 calf bodies + fixed feet
+```
+
+This produces 13 dynamic bodies: one trunk and three bodies per leg. When a
+fixed child is merged, its center of mass and inertia must be rotated into the
+parent frame and combined with the parallel-axis theorem.
+
+Each physical link should use `ChBodyAuxRef`. Its reference frame represents
+the URDF link frame, while `FrameCOMToRef` represents the URDF inertial origin.
+This preserves correct joint placement when a link frame does not coincide
+with its center of mass.
+
+Visual meshes should remain non-contact geometry. Initial collision geometry
+should use the URDF boxes, cylinders, and foot spheres. Robot self-collision
+should initially be disabled while foot-to-terrain and trunk-to-obstacle
+collision remain enabled.
+
+### Revolute joints and motors
+
+Each actuated URDF joint should be represented by a Chrono rotational motor
+with a revolute spindle constraint. The intended final actuator is
+`ChLinkMotorRotationTorque`; ideal angle motors are useful only for fixed-base
+kinematic validation.
+
+Chrono rotational motors use their local Z axis as the spindle. The motor frame
+must therefore rotate local Z onto the URDF axis. Go1 hip axes are URDF X;
+thigh and calf axes are URDF Y. Motor angle sign and zero offset must be checked
+against the existing visual forward kinematics before enabling gravity.
+
+The URDF limits include:
+
+| Joint group | Effort limit | Velocity limit |
+|---|---:|---:|
+| hip and thigh | `23.7 Nm` | `30.1 rad/s` |
+| calf | `35.55 Nm` | `20.06 rad/s` |
+
+Torque commands must be saturated at these limits. Position limits should
+initially use command clamping plus bounded soft-stop torques because the
+torque motor does not directly enforce the URDF lower and upper stops.
+
+### Actuation modes
+
+The articulated model should expose three explicit modes:
+
+1. `angle`: ideal angle motors for URDF transform and renderer validation;
+2. `pd`: torque motors with local joint-space PD control;
+3. `effort`: externally supplied torques for whole-body or MPC controllers.
+
+A bring-up PD controller can use:
+
+```text
+tau = clamp(Kp * (q_des - q) + Kd * (qd_des - qd), torque_limit)
+```
+
+The current `TrotGait` and analytical IK may supply initial desired joint
+trajectories. They do not by themselves stabilize a floating robot and must
+not be treated as a balance controller.
+
+### Contact and SCM consequences
+
+The articulated model replaces `independent_feet.py`; stance mass is no longer
+redistributed manually. Each link retains its URDF mass, and contact forces at
+the physical feet propagate through the joints to the trunk.
+
+The URDF foot collision radius is `0.02 m`, while the current SCM proxy uses
+`0.035 m`. That difference changes projected contact area and soil pressure by
+roughly a factor of three. Foot geometry must therefore be selected and
+calibrated explicitly before comparing articulated sinkage with existing proxy
+videos.
+
+The existing `0.0005 s` physics timestep supports a 2 kHz Chrono update. A
+joint controller can run at 500-1000 Hz while state publication and planning
+run more slowly. The simulation step order should be:
+
+```text
+read base, joint, and contact state
+compute and limit 12 actuator torques
+SCM Synchronize
+Chrono DoStepDynamics
+SCM Advance
+publish updated state
+```
+
+### Terrain attitude after replacement
+
+Articulated mode must remove direct support-plane trunk position and rotation
+updates. The fitted support plane may remain as a desired body-attitude input
+to a controller, but it must not overwrite physical state. Actual roll and
+pitch must result from terrain contact, joint torques, gravity, mass
+distribution, and controller response.
+
+### Commissioning sequence
+
+The model should be introduced behind a separate mode such as
+`--robot-dynamics articulated`, preserving current proxy artifacts. Bring-up
+should proceed through these gates:
+
+1. Parse the URDF and validate the consolidated mass and inertia.
+2. Compare fixed-base physical forward kinematics with the existing visual FK.
+3. Replay standing and gait poses with ideal angle motors and no contact.
+4. Establish a floating-base PD stand on rigid flat ground.
+5. Verify that summed ground reaction approximately equals robot weight.
+6. Walk on rigid flat ground without direct trunk pose updates.
+7. Add rigid uneven terrain and observe physically generated attitude.
+8. Introduce SCM only after foot pressure and contact stability are validated.
+9. Expose base, IMU, joint, effort, and contact state through ROS 2.
+10. Replace local PD references with an external whole-body controller.
+
+The first controller-ready acceptance target is a floating articulated Go1
+that stands on rigid ground for 10 seconds with bounded torques, no direct
+trunk pose writes, finite constraint errors, and physically generated body
+attitude. Walking and SCM deformation come after that gate.
+
 ## Fall behavior
 
 In normal SCM traversal, the loop writes trunk position and rotation every time

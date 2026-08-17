@@ -53,6 +53,12 @@ from quick_support_demo.chrono_demo.hazard import (
 from quick_support_demo.config import PROJECT_ROOT, load_demo_config
 from quick_support_demo.motion import ForwardTurnForward, TrotGait, VelocityCommand
 from quick_support_demo.overlays.pyvista_renderer import FrameContext, PyVistaFrameRenderer
+from quick_support_demo.overlays.splat_capture import (
+    capture_orbit_dataset,
+    orbit_views,
+    parse_float_list,
+    parse_xyz,
+)
 from quick_support_demo.robot_assets.go1 import load_go1_articulated_visual, load_go1_visual
 
 
@@ -513,6 +519,15 @@ def make_video(
     turn_angle_deg: float = -90.0,
     turn_rate_radps: float = 0.8,
     second_forward_distance_m: float = 0.90,
+    splat_output_dir: Path | None = None,
+    orbit_theta_degrees: tuple[float, ...] = (15.0, 30.0, 45.0, 60.0),
+    orbit_phi_degrees: tuple[float, ...] | None = None,
+    orbit_phi_count: int = 36,
+    orbit_phi_offset_deg: float = 0.0,
+    orbit_radius_m: float = 3.2,
+    orbit_target: tuple[float, float, float] = (0.0, 0.0, 0.15),
+    orbit_view_angle_deg: float = 45.0,
+    splat_hide_robot: bool = False,
 ) -> tuple[float, float, int]:
     cfg = load_demo_config()
     if smoke:
@@ -562,6 +577,23 @@ def make_video(
         raise ValueError("hazard_tip_rate_radps must be nonnegative")
     if difficult_max_tilt_deg <= 0.0 or difficult_max_tilt_deg >= 45.0:
         raise ValueError("difficult_max_tilt_deg must be between 0 and 45 degrees")
+    if splat_output_dir is not None:
+        if renderer != "pyvista":
+            raise ValueError("orbit RGB-D capture requires --renderer pyvista")
+        if splat_output_dir.exists():
+            raise FileExistsError(
+                f"splat output directory already exists: {splat_output_dir}"
+            )
+        orbit_views(
+            orbit_theta_degrees,
+            radius_m=orbit_radius_m,
+            target=orbit_target,
+            phi_degrees=orbit_phi_degrees,
+            phi_count=orbit_phi_count,
+            phi_offset_deg=orbit_phi_offset_deg,
+        )
+        if orbit_view_angle_deg <= 0.0 or orbit_view_angle_deg >= 180.0:
+            raise ValueError("orbit_view_angle_deg must be between 0 and 180 degrees")
     robot_cfg = copy.deepcopy(cfg["robots"][robot_name])
     robot_cfg["robot"]["mass_kg"] = float(robot_cfg["robot"]["mass_kg"]) * mass_scale
     robot_cfg["robot"]["payload_kg"] = float(robot_cfg["robot"].get("payload_kg", 0.0)) * mass_scale
@@ -721,6 +753,7 @@ def make_video(
         selected_text = f"Go1 mesh; physical proxy mass {total_mass:g} kg; SCM grid {grid_spacing_mm:g} mm."
 
     vtk_renderer = None
+    orbit_renderer = None
     try:
         if renderer == "pyvista":
             vtk_renderer = PyVistaFrameRenderer(
@@ -1004,7 +1037,79 @@ def make_video(
                     next_capture += 1.0 / fps
 
                 sim_time += dt
+
+        if splat_output_dir is not None:
+            final_heightmap = (
+                initial_heightmap
+                if terrain is None
+                else sample_heightmap(terrain, cfg["terrain"])
+            )
+            last_heightmap = final_heightmap
+            if not traverse:
+                final_gait_state = None
+            elif support_course is not None:
+                final_gait_state = visual_gait_state
+            elif hazard_triggered:
+                final_gait_state = desired_gait_state
+            else:
+                final_gait_state = contact_adjusted_gait_state(
+                    gait,
+                    desired_gait_state,
+                    independent_feet,
+                    body.GetPos(),
+                    commanded_yaw,
+                )
+            hazard_slip_distance = (
+                abs(float(body.GetPos().x) - hazard_trigger_x)
+                if hazard_trigger_x is not None
+                else 0.0
+            )
+            final_context = FrameContext(
+                heightmap=final_heightmap,
+                initial_heightmap=initial_heightmap,
+                robot_cfg=robot_cfg,
+                body=body,
+                sim_time=sim_time,
+                selected_text=selected_text,
+                gait_state=final_gait_state,
+                contact_feet=independent_feet,
+                traversal=traverse,
+                reveal_alpha=0.0,
+                hazard_triggered=hazard_triggered,
+                hazard_strike_leg=hazard_strike_leg,
+                hazard_slip_distance_m=hazard_slip_distance,
+                maneuver_phase=(maneuver_state.phase if maneuver_state is not None else None),
+            )
+            orbit_renderer = PyVistaFrameRenderer(
+                initial_heightmap,
+                robot_cfg,
+                width=width,
+                height=height,
+                dem_panel=False,
+                dem_max_mm=dem_max_mm,
+                hazard=hazard,
+                difficult_course=difficult_course,
+                rolling_course=rolling_course,
+                show_hud=False,
+                show_robot=not splat_hide_robot,
+                enable_shadows=False,
+            )
+            capture_count = capture_orbit_dataset(
+                orbit_renderer,
+                final_context,
+                splat_output_dir,
+                theta_degrees=orbit_theta_degrees,
+                radius_m=orbit_radius_m,
+                target=orbit_target,
+                view_angle_deg=orbit_view_angle_deg,
+                phi_degrees=orbit_phi_degrees,
+                phi_count=orbit_phi_count,
+                phi_offset_deg=orbit_phi_offset_deg,
+            )
+            print(f"Splat RGB-D capture: {capture_count} views written to {splat_output_dir.resolve()}")
     finally:
+        if orbit_renderer is not None:
+            orbit_renderer.close()
         if vtk_renderer is not None:
             vtk_renderer.close()
 
@@ -1104,6 +1209,39 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--turn-angle-deg", type=float, default=-90.0, help="Turn angle in degrees; negative turns right.")
     parser.add_argument("--turn-rate", type=float, default=0.8, help="Absolute in-place turn rate in rad/s.")
     parser.add_argument("--second-forward-distance", type=float, default=0.90, help="Second forward segment distance in meters.")
+    parser.add_argument(
+        "--splat-output",
+        type=Path,
+        default=None,
+        help="Capture the final simulation state as a multi-orbit RGB-D dataset in this new directory.",
+    )
+    parser.add_argument(
+        "--splat-hide-robot",
+        action="store_true",
+        help="Exclude the robot from orbit RGB and depth while leaving normal video rendering unchanged.",
+    )
+    parser.add_argument(
+        "--orbit-theta-deg",
+        type=parse_float_list,
+        default=(15.0, 30.0, 45.0, 60.0),
+        help="Comma-separated elevation rings above the XY plane.",
+    )
+    parser.add_argument(
+        "--orbit-phi-deg",
+        type=parse_float_list,
+        default=None,
+        help="Optional comma-separated azimuths; overrides --orbit-phi-count.",
+    )
+    parser.add_argument("--orbit-phi-count", type=int, default=36, help="Evenly spaced azimuths over 360 degrees per theta ring.")
+    parser.add_argument("--orbit-phi-offset-deg", type=float, default=0.0, help="Azimuth offset for evenly spaced captures.")
+    parser.add_argument("--orbit-radius", type=float, default=3.2, help="Orbit radius in meters.")
+    parser.add_argument(
+        "--orbit-target",
+        type=parse_xyz,
+        default=(0.0, 0.0, 0.15),
+        help="World-space look-at point as x,y,z in meters.",
+    )
+    parser.add_argument("--orbit-view-angle-deg", type=float, default=45.0, help="VTK vertical field of view in degrees.")
     resolution = parser.add_mutually_exclusive_group()
     resolution.add_argument("--smoke", dest="smoke", action="store_true", help="Use the coarse 35 mm SCM grid.")
     resolution.add_argument("--full-res", dest="smoke", action="store_false", help="Use the configured SCM grid (default).")
@@ -1155,6 +1293,15 @@ def main() -> None:
         args.turn_angle_deg,
         args.turn_rate,
         args.second_forward_distance,
+        args.splat_output.resolve() if args.splat_output is not None else None,
+        args.orbit_theta_deg,
+        args.orbit_phi_deg,
+        args.orbit_phi_count,
+        args.orbit_phi_offset_deg,
+        args.orbit_radius,
+        args.orbit_target,
+        args.orbit_view_angle_deg,
+        args.splat_hide_robot,
     )
     print(output.resolve())
     if args.hazard:

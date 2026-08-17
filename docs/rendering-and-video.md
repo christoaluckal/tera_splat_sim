@@ -75,6 +75,11 @@ current articulated visual pose. An explicit VTK render is issued before every
 framebuffer readback so actor updates are encoded rather than reusing the first
 frame.
 
+The same persistent VTK scene supports calibrated final-state RGB-D orbit
+capture. It renders a separate single viewport without HUD or DEM annotations,
+then reads VTK camera-axis depth from the same framebuffer. See
+[Splat RGB-D capture](splat-rgbd-capture.md).
+
 ## VTK DEM panel
 
 The VTK DEM is a flat quad mesh colored by signed elevation difference. It uses

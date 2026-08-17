@@ -67,13 +67,17 @@ dynamic balance remain future work.
 
 ## Priority 3: connected articulated Go1
 
-A physically valid walking/fall model requires:
+A physically valid walking/fall model requires a 13-body floating mechanism
+constructed from the included Go1 URDF. The detailed model, motor, contact, and
+commissioning contract is in
+[Robots and locomotion](robots-and-locomotion.md#articulated-go1-upgrade-specification).
+The implementation requires:
 
-- URDF or equivalent multibody import into Chrono;
-- correct link masses and inertias;
-- joint limits and damping;
-- foot collision geometry;
-- actuators or joint motors;
+- local URDF import because the installed PyChrono bindings have no parser;
+- fixed-child mass and inertia consolidation into 13 dynamic bodies;
+- `ChBodyAuxRef` link/reference and center-of-mass frames;
+- 12 torque motors with URDF angle, velocity, and effort limits;
+- calibrated foot collision geometry and robot collision filtering;
 - base/IMU state;
 - contact sensing;
 - body and foot trajectory tracking;
@@ -81,6 +85,19 @@ A physically valid walking/fall model requires:
 
 The existing visual IK and velocity gait can serve as trajectory references but
 must not be mistaken for actuation.
+
+Required gates, in order:
+
+1. fixed-base FK and joint-sign agreement;
+2. floating PD stand on rigid flat ground;
+3. rigid-ground walking without trunk pose writes;
+4. physically generated tilt on uneven rigid terrain;
+5. calibrated articulated-foot contact on SCM;
+6. ROS 2 effort-interface and external-controller integration.
+
+The minimum acceptance test is a 10-second floating stand with bounded joint
+torques, stable contact, finite constraint errors, and no calls that prescribe
+trunk position or attitude.
 
 ## Priority 4: ROS 2 boundary
 

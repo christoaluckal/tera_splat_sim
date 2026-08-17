@@ -46,6 +46,43 @@ def surface_mesh_arrays(
     return points, faces
 
 
+def surface_skirt_arrays(
+    heightmap: np.ndarray,
+    size_m: tuple[float, float] = PIT_SIZE_M,
+    bottom_z_m: float = -0.08,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Close the four open sides of a heightfield down to the pit base."""
+    rows, cols = heightmap.shape
+    xs = np.linspace(-0.5 * size_m[0], 0.5 * size_m[0], cols)
+    ys = np.linspace(-0.5 * size_m[1], 0.5 * size_m[1], rows)
+    edges = (
+        np.column_stack((xs, np.full(cols, -0.5 * size_m[1]), heightmap[0, :])),
+        np.column_stack((xs[::-1], np.full(cols, 0.5 * size_m[1]), heightmap[-1, ::-1])),
+        np.column_stack((np.full(rows, -0.5 * size_m[0]), ys[::-1], heightmap[::-1, 0])),
+        np.column_stack((np.full(rows, 0.5 * size_m[0]), ys, heightmap[:, -1])),
+    )
+    points = []
+    faces = []
+    point_offset = 0
+    for top in edges:
+        bottom = top.copy()
+        bottom[:, 2] = bottom_z_m
+        edge_points = np.vstack((top, bottom))
+        count = len(top)
+        edge_faces = np.column_stack(
+            (
+                np.arange(count - 1),
+                np.arange(1, count),
+                np.arange(count + 1, 2 * count),
+                np.arange(count, 2 * count - 1),
+            )
+        )
+        points.append(edge_points)
+        faces.append(edge_faces + point_offset)
+        point_offset += len(edge_points)
+    return np.vstack(points), np.vstack(faces)
+
+
 def soil_point_colors(heightmap: np.ndarray) -> np.ndarray:
     """Create deterministic granular albedo without baking in scene lighting."""
     rows, cols = np.indices(heightmap.shape)
@@ -147,6 +184,9 @@ class PyVistaFrameRenderer:
         difficult_course: DifficultCourse | None = None,
         rolling_course: RollingCourse | None = None,
         side_view: bool = False,
+        show_hud: bool = True,
+        show_robot: bool = True,
+        enable_shadows: bool = True,
     ) -> None:
         diagnostic = pyvista_runtime_diagnostic()
         if diagnostic:
@@ -165,6 +205,9 @@ class PyVistaFrameRenderer:
         self.rolling_course = rolling_course
         self.support_course = difficult_course or rolling_course
         self.side_view = side_view
+        self.show_hud = show_hud
+        self.show_robot = show_robot
+        self.enable_shadows = enable_shadows
         shape = (1, 2) if dem_panel else (1, 1)
         self.plotter = pv.Plotter(
             shape=shape,
@@ -193,12 +236,23 @@ class PyVistaFrameRenderer:
             specular_power=18.0,
             roughness=0.88,
         )
+        skirt_points, skirt_faces = surface_skirt_arrays(initial_heightmap)
+        self.terrain_skirt = pv.PolyData(skirt_points, _vtk_faces(skirt_faces))
+        self.plotter.add_mesh(
+            self.terrain_skirt,
+            color="#5e4935",
+            smooth_shading=False,
+            pbr=True,
+            ambient=0.28,
+            diffuse=0.72,
+            roughness=0.9,
+        )
 
         for center, size, color in (
-            ((-1.05, 0.0, -0.041), (0.9, 3.0, 0.08), "#6f7476"),
-            ((1.05, 0.0, -0.041), (0.9, 3.0, 0.08), "#6f7476"),
-            ((0.0, -1.05, -0.041), (1.2, 0.9, 0.08), "#6f7476"),
-            ((0.0, 1.05, -0.041), (1.2, 0.9, 0.08), "#6f7476"),
+            ((-1.05, 0.0, -0.04), (0.9, 3.0, 0.08), "#6f7476"),
+            ((1.05, 0.0, -0.04), (0.9, 3.0, 0.08), "#6f7476"),
+            ((0.0, -1.05, -0.04), (1.2, 0.9, 0.08), "#6f7476"),
+            ((0.0, 1.05, -0.04), (1.2, 0.9, 0.08), "#6f7476"),
             ((0.0, 1.38, 0.22), (0.6, 0.04, 0.36), "#e4df22"),
         ):
             bounds = (
@@ -260,15 +314,17 @@ class PyVistaFrameRenderer:
 
         self.robot_mesh = None
         self.robot_actor = None
-        self.hud = self.plotter.add_text(
-            "",
-            position=(18, max(self.height - (214 if self.hazard is not None or self.support_course is not None else 170), 12)),
-            font_size=10,
-            color="#171b1d",
-            shadow=False,
-        )
-        self.hud.GetTextProperty().SetBackgroundColor(0.94, 0.95, 0.95)
-        self.hud.GetTextProperty().SetBackgroundOpacity(0.72)
+        self.hud = None
+        if self.show_hud:
+            self.hud = self.plotter.add_text(
+                "",
+                position=(18, max(self.height - (214 if self.hazard is not None or self.support_course is not None else 170), 12)),
+                font_size=10,
+                color="#171b1d",
+                shadow=False,
+            )
+            self.hud.GetTextProperty().SetBackgroundColor(0.94, 0.95, 0.95)
+            self.hud.GetTextProperty().SetBackgroundOpacity(0.72)
         if self.side_view:
             self.plotter.camera.position = (2.85, -0.05, 0.72)
             self.plotter.camera.focal_point = (0.0, -0.05, 0.16)
@@ -283,7 +339,8 @@ class PyVistaFrameRenderer:
         self.plotter.add_light(pv.Light(position=(-2.8, -3.4, 4.8), focal_point=(0, 0, 0), intensity=0.92))
         self.plotter.add_light(pv.Light(position=(2.0, 1.2, 2.6), focal_point=(0, 0, 0), intensity=0.35))
         try:
-            self.plotter.enable_shadows()
+            if self.enable_shadows:
+                self.plotter.enable_shadows()
             self.plotter.enable_anti_aliasing("fxaa")
         except RuntimeError:
             pass
@@ -404,7 +461,21 @@ class PyVistaFrameRenderer:
     def _chrono_vector(values):
         return chrono.ChVector3d(*values)
 
-    def render(self, context: FrameContext) -> np.ndarray:
+    def set_camera(
+        self,
+        position: tuple[float, float, float],
+        focal_point: tuple[float, float, float],
+        view_angle_deg: float,
+    ) -> None:
+        self.plotter.subplot(0, 0)
+        self.plotter.camera.parallel_projection = False
+        self.plotter.camera.position = position
+        self.plotter.camera.focal_point = focal_point
+        self.plotter.camera.up = (0.0, 0.0, 1.0)
+        self.plotter.camera.view_angle = view_angle_deg
+        self.plotter.reset_camera_clipping_range()
+
+    def render(self, context: FrameContext, *, include_hud: bool = True) -> np.ndarray:
         self.plotter.subplot(0, 0)
         display_heightmap = context.heightmap.copy()
         vertical_exaggeration = 1.0 + 2.0 * context.reveal_alpha
@@ -413,7 +484,15 @@ class PyVistaFrameRenderer:
         self.terrain.points = points
         self.terrain.point_data["soil_rgb"] = self._terrain_colors(display_heightmap)
         self.terrain.Modified()
-        self._update_robot(context.body, context.gait_state, 1.0 - 0.72 * context.reveal_alpha)
+        skirt_points, _ = surface_skirt_arrays(display_heightmap)
+        self.terrain_skirt.points = skirt_points
+        self.terrain_skirt.Modified()
+        if self.show_robot:
+            self._update_robot(
+                context.body,
+                context.gait_state,
+                1.0 - 0.72 * context.reveal_alpha,
+            )
 
         if context.maneuver_phase is not None:
             motion_name = "forward-turn-forward"
@@ -490,7 +569,9 @@ class PyVistaFrameRenderer:
                 hud += "\nRIGID OFFSET SLIP HAZARD: awaiting foot contact"
         if context.reveal_alpha > 0.05:
             hud += f"\nFootprint reveal: {vertical_exaggeration:0.1f}x vertical exaggeration"
-        self.hud.SetInput(hud)
+        if self.hud is not None:
+            self.hud.SetInput(hud)
+            self.hud.SetVisibility(include_hud)
 
         if self.dem_panel:
             self.plotter.subplot(0, 1)
@@ -515,6 +596,19 @@ class PyVistaFrameRenderer:
 
         self.plotter.render()
         return np.asarray(self.plotter.screenshot(return_img=True))[:, :, :3].copy()
+
+    def depth_image_m(self) -> np.ndarray:
+        """Read positive camera-axis depth in meters from the current RGB render."""
+        signed_depth = np.asarray(
+            self.plotter.get_image_depth(
+                fill_value=np.nan,
+                reset_camera_clipping_range=False,
+            ),
+            dtype=np.float32,
+        )
+        depth_m = -signed_depth
+        depth_m[~np.isfinite(depth_m) | (depth_m <= 0.0)] = np.nan
+        return depth_m
 
     @staticmethod
     def _deformation_stats(heightmap: np.ndarray) -> tuple[float, float, int]:
