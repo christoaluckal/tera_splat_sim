@@ -297,6 +297,14 @@ all parameters, settling duration and termination reason, and the two surface
 errors.  A failed artifact is retained as evidence but is ineligible as a
 Phase-C initial condition.
 
+Particle spacing and MPM particle volume are a coupled physical setting.  For
+a regular lattice, record both the lattice spacing and `particle_size`, and
+verify that the implied particle volume/mass is consistent with the filled-bed
+volume.  Do not use a sparse lattice with a much smaller particle volume: it
+can make a visually present bed too light to support the rigid object.  Record
+whether CPIC rigid--MPM coupling is enabled; it is likewise frozen with the
+prepared state and replayed for every candidate.
+
 Every material candidate must rebuild the same scene and restore this complete
 state before the cylinder is placed.  The following are frozen for one
 BayesOpt campaign and are **not** optimization dimensions: the prepared-bed
