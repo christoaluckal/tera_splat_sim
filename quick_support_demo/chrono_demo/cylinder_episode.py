@@ -1,0 +1,244 @@
+from __future__ import annotations
+
+import csv
+import json
+from dataclasses import asdict, dataclass
+from pathlib import Path
+
+import numpy as np
+import yaml
+
+from quick_support_demo.config import load_demo_config
+
+from .build_scm_pit import build_scm_pit, sample_heightmap
+from .build_world import add_perimeter_floor, build_system, make_contact_material
+from .chrono_import import import_chrono
+
+
+chrono, _veh = import_chrono()
+
+
+CYLINDER_DIAMETER_M = 0.14605
+CYLINDER_RADIUS_M = 0.073025
+CYLINDER_HEIGHT_M = 0.0508
+
+
+@dataclass(frozen=True)
+class CylinderAction:
+    episode_id: str
+    mass_kg: float
+    center_xy_m: tuple[float, float]
+    radius_m: float = CYLINDER_RADIUS_M
+    height_m: float = CYLINDER_HEIGHT_M
+    start_clearance_m: float = 0.02
+    removal: str = "remove_body"
+
+
+def _length(vector: object) -> float:
+    return float((vector.x * vector.x + vector.y * vector.y + vector.z * vector.z) ** 0.5)
+
+
+def _heightmap_coordinates(terrain_cfg: dict) -> tuple[np.ndarray, np.ndarray]:
+    size_x, size_y = (float(value) for value in terrain_cfg["pit"]["size_m"])
+    spacing = float(terrain_cfg["pit"]["grid_spacing_m"])
+    xs = np.arange(-0.5 * size_x, 0.5 * size_x + 0.5 * spacing, spacing)
+    ys = np.arange(-0.5 * size_y, 0.5 * size_y + 0.5 * spacing, spacing)
+    return xs, ys
+
+
+def _build_cylinder(system: object, action: CylinderAction, surface_z_m: float) -> object:
+    material = make_contact_material(0.7)
+    cylinder = chrono.ChBodyEasyCylinder(
+        chrono.ChAxis_Z,
+        float(action.radius_m),
+        float(action.height_m),
+        1000.0,
+        True,
+        True,
+        material,
+    )
+    cylinder.SetName("validity_cylinder")
+    mass = float(action.mass_kg)
+    radius = float(action.radius_m)
+    height = float(action.height_m)
+    cylinder.SetMass(mass)
+    cylinder.SetInertiaXX(
+        chrono.ChVector3d(
+            mass * (3.0 * radius * radius + height * height) / 12.0,
+            mass * (3.0 * radius * radius + height * height) / 12.0,
+            0.5 * mass * radius * radius,
+        )
+    )
+    cylinder.SetPos(
+        chrono.ChVector3d(
+            float(action.center_xy_m[0]),
+            float(action.center_xy_m[1]),
+            float(surface_z_m) + float(action.start_clearance_m) + 0.5 * height,
+        )
+    )
+    cylinder.SetRot(chrono.QUNIT)
+    system.Add(cylinder)
+    return cylinder
+
+
+def _pose_row(body: object, time_s: float, phase: str) -> dict[str, float | str]:
+    pos = body.GetPos()
+    velocity = body.GetPosDt()
+    angular_velocity = body.GetAngVelParent()
+    return {
+        "time_s": float(time_s),
+        "phase": phase,
+        "x_m": float(pos.x),
+        "y_m": float(pos.y),
+        "z_m": float(pos.z),
+        "linear_speed_mps": _length(velocity),
+        "angular_speed_radps": _length(angular_velocity),
+    }
+
+
+def _write_pose_csv(path: Path, rows: list[dict[str, float | str]]) -> None:
+    with path.open("w", newline="", encoding="utf-8") as file:
+        writer = csv.DictWriter(file, fieldnames=list(rows[0].keys()))
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def _write_episode(
+    output_dir: Path,
+    action: CylinderAction,
+    world_cfg: dict,
+    terrain_cfg: dict,
+    initial_heightmap: np.ndarray,
+    loaded_heightmap: np.ndarray,
+    residual_heightmap: np.ndarray,
+    pose_rows: list[dict[str, float | str]],
+    loaded_reason: str,
+    smoke: bool,
+) -> None:
+    xs, ys = _heightmap_coordinates(terrain_cfg)
+    valid_mask = np.ones(initial_heightmap.shape, dtype=bool)
+    valid_mask[[0, -1], :] = False
+    valid_mask[:, [0, -1]] = False
+    np.save(output_dir / "initial_heightmap_m.npy", initial_heightmap)
+    np.save(output_dir / "loaded_heightmap_m.npy", loaded_heightmap)
+    np.save(output_dir / "residual_heightmap_m.npy", residual_heightmap)
+    np.save(output_dir / "valid_heightmap_mask.npy", valid_mask)
+    _write_pose_csv(output_dir / "object_pose.csv", pose_rows)
+
+    action_data = asdict(action)
+    action_data["geometry"] = "right_circular_cylinder"
+    action_data["gravity_mps2"] = list(world_cfg["world"]["gravity_mps2"])
+    with (output_dir / "action.json").open("w", encoding="utf-8") as file:
+        json.dump(action_data, file, indent=2)
+
+    loaded_row = next(row for row in reversed(pose_rows) if row["phase"] == "loaded")
+    metrics = {
+        "loaded_termination_reason": loaded_reason,
+        "loaded_sinkage_m": float(pose_rows[0]["z_m"]) - float(loaded_row["z_m"]),
+        "loaded_linear_speed_mps": float(loaded_row["linear_speed_mps"]),
+        "loaded_angular_speed_radps": float(loaded_row["angular_speed_radps"]),
+        "max_loaded_depression_m": float(np.min(loaded_heightmap - initial_heightmap)),
+        "max_residual_depression_m": float(np.min(residual_heightmap - initial_heightmap)),
+    }
+    with (output_dir / "metrics.json").open("w", encoding="utf-8") as file:
+        json.dump(metrics, file, indent=2)
+
+    manifest = {
+        "schema_version": 1,
+        "episode_id": action.episode_id,
+        "coordinate_frame": "bed",
+        "heightmap": {
+            "axis_order": "rows=y_increasing, columns=x_increasing",
+            "units": "m",
+            "origin_xy_m": [float(xs[0]), float(ys[0])],
+            "spacing_m": float(terrain_cfg["pit"]["grid_spacing_m"]),
+            "shape": list(initial_heightmap.shape),
+            "x_bounds_m": [float(xs[0]), float(xs[-1])],
+            "y_bounds_m": [float(ys[0]), float(ys[-1])],
+            "valid_mask": "valid_heightmap_mask.npy; one-cell SCM boundary ring excluded",
+        },
+        "states": {
+            "initial": "initial_heightmap_m.npy",
+            "loaded": "loaded_heightmap_m.npy",
+            "residual": "residual_heightmap_m.npy",
+        },
+        "action": "action.json",
+        "object_pose": "object_pose.csv",
+        "metrics": "metrics.json",
+        "chrono": {
+            "timestep_s": float(world_cfg["world"]["timestep_s"]),
+            "terrain_model": "SCM",
+            "smoke": bool(smoke),
+            "soil_parameters": terrain_cfg["soil"],
+        },
+    }
+    with (output_dir / "manifest.yaml").open("w", encoding="utf-8") as file:
+        yaml.safe_dump(manifest, file, sort_keys=False)
+
+
+def run_cylinder_episode(
+    output_dir: Path,
+    action: CylinderAction,
+    smoke: bool = False,
+    residual_settle_s: float = 0.5,
+) -> dict:
+    cfg = load_demo_config()
+    world_cfg = cfg["world"]
+    terrain_cfg = cfg["terrain"]
+    if smoke:
+        world_cfg["world"]["timestep_s"] = 0.001
+        world_cfg["world"]["settle_time_s"] = 0.6
+        terrain_cfg["pit"]["grid_spacing_m"] = 0.04
+    system = build_system(world_cfg)
+    add_perimeter_floor(system, world_cfg, terrain_cfg)
+    terrain = build_scm_pit(system, terrain_cfg, visualization_mesh=False)
+    initial_heightmap = sample_heightmap(terrain, terrain_cfg)
+    cylinder = _build_cylinder(system, action, float(terrain_cfg["pit"]["top_elevation_m"]))
+
+    dt = float(world_cfg["world"]["timestep_s"])
+    max_steps = int(float(world_cfg["world"]["settle_time_s"]) / dt)
+    linear_threshold = float(world_cfg["world"]["settle_velocity_mps"])
+    angular_threshold = float(world_cfg["world"]["settle_ang_velocity_radps"])
+    stable_steps = 0
+    required_stable_steps = max(1, int(0.1 / dt))
+    pose_rows = [_pose_row(cylinder, float(system.GetChTime()), "initial")]
+    loaded_reason = "timeout"
+    for _ in range(max_steps):
+        terrain.Synchronize(system.GetChTime())
+        system.DoStepDynamics(dt)
+        terrain.Advance(dt)
+        row = _pose_row(cylinder, float(system.GetChTime()), "loaded")
+        pose_rows.append(row)
+        if (
+            float(system.GetChTime()) > 0.25
+            and float(row["linear_speed_mps"]) < linear_threshold
+            and float(row["angular_speed_radps"]) < angular_threshold
+        ):
+            stable_steps += 1
+            if stable_steps >= required_stable_steps:
+                loaded_reason = "equilibrium"
+                break
+        else:
+            stable_steps = 0
+    loaded_heightmap = sample_heightmap(terrain, terrain_cfg)
+
+    system.Remove(cylinder)
+    for _ in range(int(float(residual_settle_s) / dt)):
+        terrain.Synchronize(system.GetChTime())
+        system.DoStepDynamics(dt)
+        terrain.Advance(dt)
+    residual_heightmap = sample_heightmap(terrain, terrain_cfg)
+    output_dir.mkdir(parents=True, exist_ok=False)
+    _write_episode(
+        output_dir,
+        action,
+        world_cfg,
+        terrain_cfg,
+        initial_heightmap,
+        loaded_heightmap,
+        residual_heightmap,
+        pose_rows,
+        loaded_reason,
+        smoke,
+    )
+    return {"output_dir": str(output_dir), "loaded_termination_reason": loaded_reason}

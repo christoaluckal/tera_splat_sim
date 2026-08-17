@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "chrono_episode": "/home/moog-2/christo/splatting_stuff/physical/Chrono/tera_splat_sim/validity_experiment/chrono_episodes/A0_cal_smoke",
+  "genesis_bridge": "/home/moog-2/christo/splatting_stuff/physical/Chrono/tera_splat/outputs/validity_experiment/A0_cal_smoke_genesis_accepted_prepared_smoke",
+  "coordinate_frame": "bed",
+  "source_grid_spacing_m": 0.04,
+  "display_grid_spacing_m": 0.005,
+  "interpolation": "RectBivariateSpline cubic; display-only, no new simulation information",
+  "common_valid_rectangle": {
+    "rows": [
+      1,
+      29
+    ],
+    "cols": [
+      1,
+      29
+    ]
+  },
+  "artifacts": {
+    "scm_initial": {
+      "native_vertices": 841,
+      "native_faces": 1568,
+      "display_vertices": 50625,
+      "display_faces": 100352
+    },
+    "scm_loaded": {
+      "native_vertices": 841,
+      "native_faces": 1568,
+      "display_vertices": 50625,
+      "display_faces": 100352
+    },
+    "scm_residual": {
+      "native_vertices": 841,
+      "native_faces": 1568,
+      "display_vertices": 50625,
+      "display_faces": 100352
+    },
+    "genesis_initial": {
+      "native_vertices": 841,
+      "native_faces": 1568,
+      "display_vertices": 50625,
+      "display_faces": 100352
+    },
+    "genesis_loaded": {
+      "native_vertices": 841,
+      "native_faces": 1568,
+      "display_vertices": 50625,
+      "display_faces": 100352
+    },
+    "genesis_residual": {
+      "native_vertices": 841,
+      "native_faces": 1568,
+      "display_vertices": 50625,
+      "display_faces": 100352
+    }
+  }
+}

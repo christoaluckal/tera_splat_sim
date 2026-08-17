@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "chrono_episode": "/home/moog-2/christo/splatting_stuff/physical/Chrono/tera_splat_sim/validity_experiment/chrono_episodes/A0_cal_smoke",
+  "genesis_bridge": "/home/moog-2/christo/splatting_stuff/physical/Chrono/tera_splat/outputs/validity_experiment/A0_cal_smoke_genesis_accepted_prepared_smoke",
+  "coordinate_frame": "bed",
+  "heightmap": {
+    "axis_order": "rows=y_increasing, columns=x_increasing",
+    "units": "m",
+    "origin_xy_m": [
+      -0.6,
+      -0.6
+    ],
+    "spacing_m": 0.04,
+    "shape": [
+      31,
+      31
+    ],
+    "x_bounds_m": [
+      -0.6,
+      0.6000000000000011
+    ],
+    "y_bounds_m": [
+      -0.6,
+      0.6000000000000011
+    ],
+    "valid_mask": "valid_heightmap_mask.npy; one-cell SCM boundary ring excluded"
+  },
+  "mask": "common Chrono/Genesis valid_heightmap_mask intersection",
+  "files": {
+    "scm_initial": 841,
+    "genesis_initial": 841,
+    "scm_loaded": 841,
+    "genesis_loaded": 841,
+    "scm_residual": 841,
+    "genesis_residual": 841,
+    "genesis_initial_raw": 3844,
+    "genesis_loaded_raw": 3844,
+    "genesis_residual_raw": 3844
+  }
+}

@@ -1,0 +1,40 @@
+schema_version: 1
+episode_id: A0_repeat
+coordinate_frame: bed
+heightmap:
+  axis_order: rows=y_increasing, columns=x_increasing
+  units: m
+  origin_xy_m:
+  - -0.6
+  - -0.6
+  spacing_m: 0.04
+  shape:
+  - 31
+  - 31
+  x_bounds_m:
+  - -0.6
+  - 0.6000000000000011
+  y_bounds_m:
+  - -0.6
+  - 0.6000000000000011
+  valid_mask: valid_heightmap_mask.npy; one-cell SCM boundary ring excluded
+states:
+  initial: initial_heightmap_m.npy
+  loaded: loaded_heightmap_m.npy
+  residual: residual_heightmap_m.npy
+action: action.json
+object_pose: object_pose.csv
+metrics: metrics.json
+chrono:
+  timestep_s: 0.001
+  terrain_model: SCM
+  smoke: true
+  soil_parameters:
+    bekker_kphi: 800000.0
+    bekker_kc: 25000.0
+    bekker_n: 1.1
+    mohr_cohesion: 1000.0
+    mohr_friction_deg: 28.0
+    janosi_shear_m: 0.01
+    elastic_k: 20000000.0
+    damping_r: 30000.0

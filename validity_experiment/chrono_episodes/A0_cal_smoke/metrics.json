@@ -1,0 +1,8 @@
+{
+  "loaded_termination_reason": "timeout",
+  "loaded_sinkage_m": 0.020165430898122366,
+  "loaded_linear_speed_mps": 0.0009704660869618217,
+  "loaded_angular_speed_radps": 0.010585260361053127,
+  "max_loaded_depression_m": -0.08920910209417343,
+  "max_residual_depression_m": -0.08920910209417343
+}

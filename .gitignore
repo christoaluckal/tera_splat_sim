@@ -4,7 +4,10 @@ __pycache__/
 *$py.class
 *.pyc
 *.dae
-
+*.mp4
+outputs
+*.ply
+*.pcd
 # C extensions
 *.so
 

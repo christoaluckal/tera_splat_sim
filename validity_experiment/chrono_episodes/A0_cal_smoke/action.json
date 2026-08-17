@@ -1,0 +1,18 @@
+{
+  "episode_id": "A0_cal",
+  "mass_kg": 1.5,
+  "center_xy_m": [
+    0.0,
+    0.0
+  ],
+  "radius_m": 0.073025,
+  "height_m": 0.0508,
+  "start_clearance_m": 0.02,
+  "removal": "remove_body",
+  "geometry": "right_circular_cylinder",
+  "gravity_mps2": [
+    0.0,
+    0.0,
+    -9.81
+  ]
+}
