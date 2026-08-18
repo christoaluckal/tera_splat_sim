@@ -1,14 +1,16 @@
 # Chronos Quick Support Demo
 
-PyChrono scaffold for the quick visual demo in `QUICK_VISUAL_DEMO_PLAN.md`.
+PyChrono scaffold for the quick visual demo. The original storyboard is kept
+for provenance in [`archive/quick-visual-demo-plan.md`](archive/quick-visual-demo-plan.md).
 
 The canonical, structured documentation starts at
-[`docs/README.md`](docs/README.md). It links specialist references for the
+[`README.md`](README.md). It links specialist references for the
 architecture, configuration, physics, robot/gait model, rendering, planning,
 operations, validation, limitations, and roadmap.
 
 For the full implementation inventory, measured results, known correctness
-issues, and recommended next steps, see `CURRENT_SYSTEM_STATE.md`.
+issues, and recommended next steps, see
+[`archive/current-system-state-2026-08-13.md`](archive/current-system-state-2026-08-13.md).
 
 The current implementation covers the first support-planning milestone:
 
@@ -270,7 +272,7 @@ conda run -n chrono_splat python -m quick_support_demo.overlays.make_chrono_3d_v
 
 The dataset includes RGB PNGs, aligned float32 meter depth, uint16 millimeter
 depth PNGs, camera intrinsics, and OpenGL camera-to-world poses. See
-[`docs/splat-rgbd-capture.md`](docs/splat-rgbd-capture.md) for the complete
+[`splat-rgbd-capture.md`](splat-rgbd-capture.md) for the complete
 schema, coordinate conventions, direct COLMAP export, and the current
 Frankenstein `train_nomask.py` command. The direct exporter uses known poses
 and RGB-D geometry, so synthetic scenes do not depend on COLMAP feature

@@ -42,7 +42,8 @@ crossing while a synchronized DEM shows `current - initial` elevation.
 | Closed-loop balance controller | Not implemented |
 | Articulated Chrono leg dynamics | Not implemented |
 | ROS 2 command bridge | Not implemented |
-| Genesis MPM and Gaussian transfer | Proposed only |
+| Genesis MPM bridge | Implemented in companion `tera_splat`; parameter calibration pending |
+| Gaussian transfer | Proposed only |
 | Rigid offset hazard and reduced-order fall | Implemented |
 | Rigid difficult terrain with completion and trunk tilt | Implemented approximation |
 | Deformable SCM hills/valleys with completion and trunk tilt | Implemented approximation |
@@ -50,7 +51,7 @@ crossing while a synchronized DEM shows `current - initial` elevation.
 
 Latest verified PyVista traversal:
 
-- video: [`quick_support_demo/outputs/videos/go1_velocity_trot_pyvista_dem_12p5kg.mp4`](../quick_support_demo/outputs/videos/go1_velocity_trot_pyvista_dem_12p5kg.mp4)
+- historical output path: `quick_support_demo/outputs/videos/go1_velocity_trot_pyvista_dem_12p5kg.mp4`
 - mass: `12.5 kg`
 - SCM grid: `35 mm` smoke setting
 - output: H.264, `1280x720`, 6 FPS, 66 frames, 11 seconds
@@ -58,7 +59,7 @@ Latest verified PyVista traversal:
 
 Latest verified rigid hazard artifact:
 
-- video: [`quick_support_demo/outputs/videos/go1_rigid_offset_hazard_slip_pyvista_12p5kg.mp4`](../quick_support_demo/outputs/videos/go1_rigid_offset_hazard_slip_pyvista_12p5kg.mp4)
+- historical output path: `quick_support_demo/outputs/videos/go1_rigid_offset_hazard_slip_pyvista_12p5kg.mp4`
 - nominal robot mass: `12.5 kg`
 - rigid block: center x offset `0.13 m`, height `0.13 m`
 - event: front-right foot strike at `3.852 s`
@@ -68,8 +69,8 @@ Latest verified rigid hazard artifact:
 
 Latest verified difficult-terrain artifact:
 
-- video: [`quick_support_demo/outputs/videos/go1_rigid_difficult_terrain_tilt_pyvista_12p5kg.mp4`](../quick_support_demo/outputs/videos/go1_rigid_difficult_terrain_tilt_pyvista_12p5kg.mp4)
-- side view: [`quick_support_demo/outputs/videos/go1_rigid_difficult_terrain_side_pyvista_12p5kg.mp4`](../quick_support_demo/outputs/videos/go1_rigid_difficult_terrain_side_pyvista_12p5kg.mp4)
+- historical output path: `quick_support_demo/outputs/videos/go1_rigid_difficult_terrain_tilt_pyvista_12p5kg.mp4`
+- historical side-view path: `quick_support_demo/outputs/videos/go1_rigid_difficult_terrain_side_pyvista_12p5kg.mp4`
 - nominal robot mass: `12.5 kg`
 - course: three staggered rigid pads, `55-85 mm` high
 - maximum commanded trunk tilt: `11.8 deg`
@@ -79,7 +80,7 @@ Latest verified difficult-terrain artifact:
 
 Pre-boundary-fix straight rolling artifact, retained for history:
 
-- video: [`quick_support_demo/outputs/videos/go1_rolling_hills_valleys_scm_deformation_pyvista_dem_12p5kg.mp4`](../quick_support_demo/outputs/videos/go1_rolling_hills_valleys_scm_deformation_pyvista_dem_12p5kg.mp4)
+- historical output path: `quick_support_demo/outputs/videos/go1_rolling_hills_valleys_scm_deformation_pyvista_dem_12p5kg.mp4`
 - nominal robot mass: `12.5 kg`
 - initial terrain elevation: `-64.2 mm` to `+76.9 mm`
 - status: superseded because out-of-pit SCM queries lowered the spawn pose into
@@ -90,7 +91,7 @@ Pre-boundary-fix straight rolling artifact, retained for history:
 
 Latest verified forward-turn-forward artifact:
 
-- video: [`quick_support_demo/outputs/videos/go1_rolling_scm_forward_turn_forward_pyvista_dem_12p5kg.mp4`](../quick_support_demo/outputs/videos/go1_rolling_scm_forward_turn_forward_pyvista_dem_12p5kg.mp4)
+- historical output path: `quick_support_demo/outputs/videos/go1_rolling_scm_forward_turn_forward_pyvista_dem_12p5kg.mp4`
 - sequence: `0.85 m` forward, `-90 deg` right turn at `0.8 rad/s`, `0.90 m` forward
 - speed: `0.25 m/s`
 - final pose: `(x=0.900, y=-0.249) m`, yaw `0.0 deg`
@@ -135,6 +136,8 @@ complete system description.
 12. [Splat RGB-D capture](splat-rgbd-capture.md)
     Multi-level orbit sampling, RGB/depth formats, intrinsics, poses, and
     coordinate conventions.
+13. [Getting started](getting-started.md)
+    Concise environment setup, routine commands, and rendering entry points.
 
 ## Quick start
 
@@ -241,20 +244,23 @@ When documents disagree, use this precedence:
 
 1. Current source code and YAML configuration.
 2. This `docs/` set.
-3. Root [`README.md`](../README.md) as a concise operational introduction.
-4. Root historical or proposal documents.
+3. The active documents in this directory.
+4. Dated files in [`archive/`](archive/) for provenance only.
 
-The date-sensitive verified state in this set is August 16, 2026.
+The date-sensitive verified state in this set is August 18, 2026.
 
 ## Legacy and proposal documents
 
 The following files remain useful but are not the canonical current reference:
 
-- [`QUICK_VISUAL_DEMO_PLAN.md`](../QUICK_VISUAL_DEMO_PLAN.md): original target,
+- [`quick-visual-demo-plan.md`](archive/quick-visual-demo-plan.md): original target,
   storyboard, and acceptance plan. Some milestones remain unfinished.
-- [`CURRENT_SYSTEM_STATE.md`](../CURRENT_SYSTEM_STATE.md): earlier monolithic
+- [`current-system-state-2026-08-13.md`](archive/current-system-state-2026-08-13.md): earlier monolithic
   state record, including historical trials. It is useful for provenance but
   contains sections that predate velocity gait, tests, and VTK rendering.
-- [`CHRONO_TO_MPM_GAUSSIAN_PIPELINE.md`](../CHRONO_TO_MPM_GAUSSIAN_PIPELINE.md):
+- [`chrono-to-mpm-gaussian-pipeline-proposal-2026-08-12.md`](archive/chrono-to-mpm-gaussian-pipeline-proposal-2026-08-12.md):
   externally generated extension proposal. Genesis MPM and Gaussian transfer
-  described there are not implemented in this repository.
+  described there are not fully implemented in this repository.
+- [`sim-only-validity-plan-2026-08-17.md`](archive/sim-only-validity-plan-2026-08-17.md):
+  the initial cross-model validation plan. Use the companion project's current
+  state for the latest completed bridge evidence.

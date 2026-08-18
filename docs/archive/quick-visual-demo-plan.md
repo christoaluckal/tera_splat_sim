@@ -1,7 +1,7 @@
 # Quick Visual Demo: Robot-Conditioned Planning over a Deformable Sand Pit
 
 > **Document status:** Original requirements and storyboard. For the canonical
-> current implementation documentation, start at [`docs/README.md`](docs/README.md).
+> current implementation documentation, start at [`docs/README.md`](../README.md).
 
 ## 1. Demo objective
 

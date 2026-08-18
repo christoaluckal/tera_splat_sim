@@ -115,7 +115,7 @@ For each selected robot and candidate:
 | Output | Mesh-initialized SCM DEM difference | Implemented |
 | Output | Calibrated final-state RGB-D orbit dataset | Implemented for Go1/PyVista |
 | Integration | ROS 2 | Not implemented |
-| Extension | Genesis MPM | Proposed only |
+| Cross-model bridge | Genesis MPM in companion `tera_splat` | Implemented for A0; calibration pending |
 | Extension | Gaussian deformation transfer | Proposed only |
 
 ## Repository layout
@@ -134,10 +134,10 @@ Chronos/
 |   |-- tests/                         unit tests
 |   `-- outputs/                       generated trials, frames, and videos
 |-- run_demo.py                        stationary experiment entry point
-|-- README.md                          concise usage introduction
-|-- QUICK_VISUAL_DEMO_PLAN.md          original plan
-|-- CURRENT_SYSTEM_STATE.md            historical monolithic state
-`-- CHRONO_TO_MPM_GAUSSIAN_PIPELINE.md extension proposal
+|-- docs/getting-started.md            concise usage introduction
+|-- docs/archive/quick-visual-demo-plan.md
+|-- docs/archive/current-system-state-2026-08-13.md
+`-- docs/archive/chrono-to-mpm-gaussian-pipeline-proposal-2026-08-12.md
 ```
 
 ## What the current demo demonstrates

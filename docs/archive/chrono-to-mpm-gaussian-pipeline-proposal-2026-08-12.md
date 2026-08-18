@@ -1,8 +1,10 @@
 # Chrono to Genesis MPM to Gaussian Terrain Pipeline
 
-> **Document status:** External extension proposal, not an implemented pipeline.
+> **Document status:** Historical external extension proposal. It is not the
+> current implementation record; use the active `docs/` set and the companion
+> project's current-state document for current bridge evidence.
 > Current implementation and roadmap status are indexed at
-> [`docs/README.md`](docs/README.md).
+> [`docs/README.md`](../README.md).
 
 Snapshot date: 2026-08-12
 
@@ -48,7 +50,7 @@ still required before Genesis calibration.
 
 ## 2. Relationship to the current system
 
-This document continues `CURRENT_SYSTEM_STATE.md`. That document describes the
+This document continues `current-system-state-2026-08-13.md`. That document describes the
 implemented Chrono quick-support demo, including its current physics proxy,
 rendering paths, outputs, limitations, and known correctness issues.
 
@@ -772,7 +774,7 @@ outputs before these steps are complete.
 
 Before modifying the pipeline, an agent should verify:
 
-- `CURRENT_SYSTEM_STATE.md` has been read;
+- `current-system-state-2026-08-13.md` has been read;
 - the current PyChrono version is still 8.0.0;
 - friction is passed to SCM in the units expected by that installed version;
 - smoke and full-resolution settings are distinguishable in saved manifests;

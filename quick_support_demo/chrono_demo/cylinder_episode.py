@@ -181,6 +181,8 @@ def run_cylinder_episode(
     action: CylinderAction,
     smoke: bool = False,
     residual_settle_s: float = 0.5,
+    timestep_s: float | None = None,
+    settle_time_s: float | None = None,
 ) -> dict:
     cfg = load_demo_config()
     world_cfg = cfg["world"]
@@ -189,6 +191,14 @@ def run_cylinder_episode(
         world_cfg["world"]["timestep_s"] = 0.001
         world_cfg["world"]["settle_time_s"] = 0.6
         terrain_cfg["pit"]["grid_spacing_m"] = 0.04
+    if timestep_s is not None:
+        if timestep_s <= 0.0:
+            raise ValueError("timestep_s must be positive")
+        world_cfg["world"]["timestep_s"] = float(timestep_s)
+    if settle_time_s is not None:
+        if settle_time_s <= 0.0:
+            raise ValueError("settle_time_s must be positive")
+        world_cfg["world"]["settle_time_s"] = float(settle_time_s)
     system = build_system(world_cfg)
     add_perimeter_floor(system, world_cfg, terrain_cfg)
     terrain = build_scm_pit(system, terrain_cfg, visualization_mesh=False)

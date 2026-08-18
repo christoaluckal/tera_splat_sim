@@ -14,6 +14,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--mass-kg", type=float, default=1.5)
     parser.add_argument("--xy", type=float, nargs=2, default=(0.0, 0.0), metavar=("X_M", "Y_M"))
     parser.add_argument("--smoke", action="store_true", help="Use the coarse SCM grid for plumbing only.")
+    parser.add_argument("--timestep-s", type=float, default=None, help="Override the Chrono integration timestep.")
+    parser.add_argument("--settle-time-s", type=float, default=None, help="Override the loaded-settle duration.")
+    parser.add_argument("--residual-settle-s", type=float, default=0.5, help="Post-removal recovery duration.")
     parser.add_argument("--output-dir", type=Path, default=None)
     return parser.parse_args()
 
@@ -30,6 +33,9 @@ def main() -> None:
         output_dir=output_dir,
         action=CylinderAction(args.episode_id, args.mass_kg, (float(args.xy[0]), float(args.xy[1]))),
         smoke=args.smoke,
+        timestep_s=args.timestep_s,
+        settle_time_s=args.settle_time_s,
+        residual_settle_s=args.residual_settle_s,
     )
     print(result["output_dir"])
     print(f"loaded_termination_reason: {result['loaded_termination_reason']}")

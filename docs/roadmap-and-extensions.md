@@ -115,15 +115,16 @@ placing ROS logic directly in `make_chrono_3d_video.py`.
 ## Priority 5: Chrono to Genesis MPM
 
 The external proposal in
-[`CHRONO_TO_MPM_GAUSSIAN_PIPELINE.md`](../CHRONO_TO_MPM_GAUSSIAN_PIPELINE.md)
-describes a possible extension. The minimum trustworthy sequence is:
+[`chrono-to-mpm-gaussian-pipeline-proposal-2026-08-12.md`](archive/chrono-to-mpm-gaussian-pipeline-proposal-2026-08-12.md)
+describes the original extension. Its first three interface steps now exist in
+the companion `tera_splat` repository: a full-resolution 10 mm Chrono A0
+episode, an accepted volumetric CPIC Genesis bed restored from complete MPM
+state, and common-grid initial/loaded/residual maps. The Genesis response is
+not yet calibrated, so the next trustworthy sequence is:
 
-1. Export a canonical undeformed terrain and contact episode from Chrono.
-2. Build the same initial bed and action in Genesis MPM.
-3. Compare surface elevation, displaced volume, footprint extent, and time
-   evolution in common coordinates.
-4. Fit effective MPM parameters in stages.
-5. Validate on held-out loads and trajectories.
+1. Freeze that A0 action, prepared state, and common 10 mm grid.
+2. Fit effective MPM parameters in stages against the loaded/residual maps.
+3. Validate on held-out loads and locations.
 
 Do not initialize MPM from an already-deformed Chrono surface and replay the
 same load as if that were a model comparison.
@@ -146,6 +147,7 @@ Only after an MPM episode is validated:
 | Current SCM proxy | qualitative support and deformation demo |
 | Reduced-order fall (current) | hazard-triggered rigid trunk fall demonstration |
 | Articulated Chrono robot | dynamic stability and controller experiments |
-| Matched Genesis MPM | cross-model terrain prediction comparison |
+| A0 Genesis bridge (current) | compatible state/action interface; calibration pending |
+| Matched Genesis MPM | calibrated cross-model terrain prediction comparison |
 | Gaussian transfer | physically conditioned visual scene update |
 | Real-sand calibration | claims tied to measured material and robot data |

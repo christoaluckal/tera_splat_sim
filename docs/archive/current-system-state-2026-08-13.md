@@ -2,7 +2,7 @@
 
 > **Document status:** Historical monolithic snapshot retained for provenance.
 > It contains sections that predate the current tests and PyVista renderer. For
-> current documentation, start at [`docs/README.md`](docs/README.md).
+> current documentation, start at [`docs/README.md`](../README.md).
 
 Snapshot date: 2026-08-13
 
@@ -40,7 +40,7 @@ clearest current visual artifact.
 
 ## 2. Original objective and current scope
 
-The original plan in `QUICK_VISUAL_DEMO_PLAN.md` asks for a short demonstration
+The original plan in `quick-visual-demo-plan.md` asks for a short demonstration
 of robot-conditioned planning over a central sand pit:
 
 ```text
@@ -99,9 +99,9 @@ Current scope:
 
 ```text
 Chronos/
-|-- QUICK_VISUAL_DEMO_PLAN.md          Original target design
-|-- CURRENT_SYSTEM_STATE.md            This implementation handoff
-|-- README.md                          Short setup and command reference
+|-- docs/archive/quick-visual-demo-plan.md
+|-- docs/archive/current-system-state-2026-08-13.md
+|-- docs/getting-started.md            Short setup and command reference
 |-- run_demo.py                        Trial/planning command-line entry point
 `-- quick_support_demo/
     |-- assets/

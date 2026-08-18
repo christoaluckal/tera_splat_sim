@@ -1,5 +1,10 @@
 # Initial Sim-Only Validity Plan
 
+> **Document status:** Historical planning snapshot. The production 10 mm SCM
+> A0 and CPIC Genesis bridge have since completed; use the companion
+> `tera_splat/docs/current-state.md` for the current evidence and readiness
+> gate.
+
 Snapshot date: 2026-08-17
 
 ## 1. Purpose
