@@ -114,6 +114,7 @@ def _write_episode(
     pose_rows: list[dict[str, float | str]],
     loaded_reason: str,
     smoke: bool,
+    terrain_snapshots: list[tuple[dict[str, float | str | None], np.ndarray]] | None = None,
 ) -> None:
     xs, ys = _heightmap_coordinates(terrain_cfg)
     valid_mask = np.ones(initial_heightmap.shape, dtype=bool)
@@ -174,6 +175,25 @@ def _write_episode(
     }
     with (output_dir / "manifest.yaml").open("w", encoding="utf-8") as file:
         yaml.safe_dump(manifest, file, sort_keys=False)
+    if terrain_snapshots is not None:
+        snapshot_dir = output_dir / "terrain_snapshots"
+        snapshot_dir.mkdir()
+        records: list[dict[str, float | str | None]] = []
+        for index, (record, heightmap) in enumerate(terrain_snapshots):
+            name = f"snapshot_{index:04d}.npy"
+            np.save(snapshot_dir / name, heightmap)
+            records.append({**record, "heightmap": name})
+        with (snapshot_dir / "manifest.json").open("w", encoding="utf-8") as file:
+            json.dump(
+                {
+                    "schema_version": 1,
+                    "source": "SCMTerrain.GetHeight sampled at capture times",
+                    "capture_count": len(records),
+                    "records": records,
+                },
+                file,
+                indent=2,
+            )
 
 
 def run_cylinder_episode(
@@ -183,6 +203,7 @@ def run_cylinder_episode(
     residual_settle_s: float = 0.5,
     timestep_s: float | None = None,
     settle_time_s: float | None = None,
+    capture_interval_s: float | None = None,
 ) -> dict:
     cfg = load_demo_config()
     world_cfg = cfg["world"]
@@ -199,6 +220,8 @@ def run_cylinder_episode(
         if settle_time_s <= 0.0:
             raise ValueError("settle_time_s must be positive")
         world_cfg["world"]["settle_time_s"] = float(settle_time_s)
+    if capture_interval_s is not None and capture_interval_s <= 0.0:
+        raise ValueError("capture_interval_s must be positive")
     system = build_system(world_cfg)
     add_perimeter_floor(system, world_cfg, terrain_cfg)
     terrain = build_scm_pit(system, terrain_cfg, visualization_mesh=False)
@@ -212,6 +235,22 @@ def run_cylinder_episode(
     stable_steps = 0
     required_stable_steps = max(1, int(0.1 / dt))
     pose_rows = [_pose_row(cylinder, float(system.GetChTime()), "initial")]
+    terrain_snapshots: list[tuple[dict[str, float | str | None], np.ndarray]] | None = None
+    next_capture_time = float("inf")
+    if capture_interval_s is not None:
+        terrain_snapshots = [
+            (
+                {
+                    "time_s": 0.0,
+                    "phase": "initial",
+                    "body_x_m": float(pose_rows[0]["x_m"]),
+                    "body_y_m": float(pose_rows[0]["y_m"]),
+                    "body_z_m": float(pose_rows[0]["z_m"]),
+                },
+                initial_heightmap.copy(),
+            )
+        ]
+        next_capture_time = float(capture_interval_s)
     loaded_reason = "timeout"
     for _ in range(max_steps):
         terrain.Synchronize(system.GetChTime())
@@ -219,6 +258,20 @@ def run_cylinder_episode(
         terrain.Advance(dt)
         row = _pose_row(cylinder, float(system.GetChTime()), "loaded")
         pose_rows.append(row)
+        if terrain_snapshots is not None and float(system.GetChTime()) + 1.0e-12 >= next_capture_time:
+            terrain_snapshots.append(
+                (
+                    {
+                        "time_s": float(system.GetChTime()),
+                        "phase": "loaded",
+                        "body_x_m": float(row["x_m"]),
+                        "body_y_m": float(row["y_m"]),
+                        "body_z_m": float(row["z_m"]),
+                    },
+                    sample_heightmap(terrain, terrain_cfg),
+                )
+            )
+            next_capture_time += float(capture_interval_s)
         if (
             float(system.GetChTime()) > 0.25
             and float(row["linear_speed_mps"]) < linear_threshold
@@ -237,6 +290,20 @@ def run_cylinder_episode(
         terrain.Synchronize(system.GetChTime())
         system.DoStepDynamics(dt)
         terrain.Advance(dt)
+        if terrain_snapshots is not None and float(system.GetChTime()) + 1.0e-12 >= next_capture_time:
+            terrain_snapshots.append(
+                (
+                    {
+                        "time_s": float(system.GetChTime()),
+                        "phase": "post_removal",
+                        "body_x_m": None,
+                        "body_y_m": None,
+                        "body_z_m": None,
+                    },
+                    sample_heightmap(terrain, terrain_cfg),
+                )
+            )
+            next_capture_time += float(capture_interval_s)
     residual_heightmap = sample_heightmap(terrain, terrain_cfg)
     output_dir.mkdir(parents=True, exist_ok=False)
     _write_episode(
@@ -250,5 +317,6 @@ def run_cylinder_episode(
         pose_rows,
         loaded_reason,
         smoke,
+        terrain_snapshots,
     )
     return {"output_dir": str(output_dir), "loaded_termination_reason": loaded_reason}

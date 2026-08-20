@@ -8,6 +8,7 @@ __pycache__/
 outputs
 *.ply
 *.pcd
+validity_experiment
 # C extensions
 *.so
 
