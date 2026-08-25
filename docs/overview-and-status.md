@@ -115,7 +115,7 @@ For each selected robot and candidate:
 | Output | Mesh-initialized SCM DEM difference | Implemented |
 | Output | Calibrated final-state RGB-D orbit dataset | Implemented for Go1/PyVista |
 | Integration | ROS 2 | Not implemented |
-| Cross-model bridge | Genesis MPM in companion `tera_splat` | Implemented for A0; calibration pending |
+| Cross-model bridge | Genesis MPM in companion `tera_splat` | I/O and BayesOpt implemented; physical calibration awaits Chrono-oracle validation |
 | Extension | Gaussian deformation transfer | Proposed only |
 
 ## Repository layout
@@ -181,3 +181,26 @@ The current repository does not demonstrate:
 
 See [limitations and supported claims](limitations-and-claims.md) before using
 the outputs in a report or presentation.
+
+## Cross-model calibration status (2026-08-25)
+
+The companion `tera_splat` repository now has a runnable Chrono-to-Genesis
+calibration loop: it transfers the frozen bed geometry, prepares each Genesis
+candidate, tests its no-action stability, scores loaded and residual surfaces,
+and records online optimization results. That operational status concerns the
+data path and optimizer, not the physical validity of the Chrono target.
+
+The current centered-cylinder reference uses a 10 mm SCM grid and produces an
+unexpectedly asymmetric loaded imprint: the deepest sampled point is roughly
+30 mm from the action center although the cylinder is centered and its lateral
+motion is negligible. A numerical optimizer can legitimately fit that sampled
+surface, including any grid/contact artifact it contains. Therefore current
+Genesis best-fit values are provisional and must not be presented as calibrated
+material properties.
+
+Before changing Genesis constitutive parameters, validate the Chrono oracle by
+repeating the same episode at 2--5 mm SCM spacing with time-resolved terrain
+captures. Check footprint centering, rotational symmetry, the radial loading
+profile, and rebound from loaded to residual. A validated replacement target
+can then be passed through the existing bridge and BayesOpt workflow without
+altering its initialization, loss definition, or parameter set.
