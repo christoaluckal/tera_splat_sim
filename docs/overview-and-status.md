@@ -182,7 +182,7 @@ The current repository does not demonstrate:
 See [limitations and supported claims](limitations-and-claims.md) before using
 the outputs in a report or presentation.
 
-## Cross-model calibration status (2026-08-25)
+## Cross-model calibration status (updated 2026-08-26)
 
 The companion `tera_splat` repository now has a runnable Chrono-to-Genesis
 calibration loop: it transfers the frozen bed geometry, prepares each Genesis
@@ -190,17 +190,55 @@ candidate, tests its no-action stability, scores loaded and residual surfaces,
 and records online optimization results. That operational status concerns the
 data path and optimizer, not the physical validity of the Chrono target.
 
-The current centered-cylinder reference uses a 10 mm SCM grid and produces an
-unexpectedly asymmetric loaded imprint: the deepest sampled point is roughly
-30 mm from the action center although the cylinder is centered and its lateral
-motion is negligible. A numerical optimizer can legitimately fit that sampled
-surface, including any grid/contact artifact it contains. Therefore current
-Genesis best-fit values are provisional and must not be presented as calibrated
-material properties.
+The completed `A0_cal_full10mm` studies use a legacy free-centered 10 mm
+reference. A fresh replay matches its stored maps within `0.00076 mm`, so it
+is not stale data or an obsolete Chrono build. It is retired from future
+calibration because it has an incomplete residual-time contract and an
+unqualified free-load protocol. Keep its results as I/O/optimizer evidence but
+do not seed or mix them into the next W&B study.
 
-Before changing Genesis constitutive parameters, validate the Chrono oracle by
-repeating the same episode at 2--5 mm SCM spacing with time-resolved terrain
-captures. Check footprint centering, rotational symmetry, the radial loading
-profile, and rebound from loaded to residual. A validated replacement target
-can then be passed through the existing bridge and BayesOpt workflow without
-altering its initialization, loss definition, or parameter set.
+The active R&D protocol is a 1.5 kg vertically guided cylinder at `(0, +5) mm`
+on a 0.6 m, 10 mm SCM screen. This offset guided case has the cleanest observed
+cross-section; it is an iteration-speed choice, not a physical parameter. The
+same guided protocol at 5 mm is reserved for final high-fidelity validation.
+Both current compact cases end at a fixed loading timeout, so neither is an
+exportable oracle yet. The next code change is a recorded speed-and-hold
+loading convergence gate, followed by fixed-duration residual recovery. Once a
+fresh 10 mm episode passes that contract, the existing Genesis bridge and
+BayesOpt logic run unchanged with a new isolated W&B study.
+
+## SCM oracle runtime (2026-08-25)
+
+The `chrono_splat` Conda environment now activates a separately built,
+headless Chrono `10.0.0` Vehicle/Python binding from
+`/data/christoa/Chrono/build/projectchrono-10.0.0-vehicle-py310`. The source
+is pinned at commit `9faf13dd8f1128dd75ed233a9627027b0422c3f7` and was built
+against the `chrono_splat` Python 3.10 interpreter with core, Vehicle, Vehicle
+Models, and Python bindings enabled. The Conda package remains in place, but
+the activation hook gives the full binding precedence, so SCM instrumentation
+continues to run through `chrono_splat` without changing the Genesis package
+stack.
+
+A direct smoke test imported `pychrono.vehicle`, constructed a Bullet-backed
+`SCMTerrain`, initialized a 10 mm patch, and sampled its height successfully.
+For reproducible oracle-resolution studies,
+`run_cylinder_episode.py --scm-grid-spacing-m <spacing>` overrides only that
+episode; it does not edit the shared terrain configuration. The completed time-captured 5 mm guided episode is at
+`/data/christoa/Chrono/tera_splat_sim/validity_experiment/chrono_episodes/A0_oracle_mass1p5kg_guided_5mm`.
+It is final-validation evidence only until the new convergence gate records a
+stable loading state.
+
+## SCM translation/phase check correction (2026-08-26)
+
+The earlier grid-lock conclusion was invalid because its centroid calculation
+included the excluded SCM boundary ring. With `valid_heightmap_mask.npy`, the
+early deformation moves with the shifted cylinder. The compact test indicates
+millimetre-scale coarse-grid phase sensitivity, not a fixed world-coordinate
+feature. Guided and finer-resolution validation remain appropriate. The
+legacy target is retired for its timing/protocol contract, not because this
+phase test alone invalidates a 10 mm SCM surface.
+
+Corrected values and artifact paths are in
+[`tera_splat/docs/chrono-oracle-diagnostics.md`](../../tera_splat/docs/chrono-oracle-diagnostics.md).
+The next-run decision and legacy-observation policy are in
+[`tera_splat/docs/chrono-oracle-run-contract.md`](../../tera_splat/docs/chrono-oracle-run-contract.md).

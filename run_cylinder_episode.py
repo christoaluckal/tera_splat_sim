@@ -15,6 +15,20 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--xy", type=float, nargs=2, default=(0.0, 0.0), metavar=("X_M", "Y_M"))
     parser.add_argument("--smoke", action="store_true", help="Use the coarse SCM grid for plumbing only.")
     parser.add_argument("--timestep-s", type=float, default=None, help="Override the Chrono integration timestep.")
+    parser.add_argument(
+        "--scm-grid-spacing-m",
+        type=float,
+        default=None,
+        help="Override SCM grid spacing for an oracle-validation episode.",
+    )
+    parser.add_argument(
+        "--scm-pit-size-m",
+        type=float,
+        nargs=2,
+        default=None,
+        metavar=("SIZE_X_M", "SIZE_Y_M"),
+        help="Override SCM patch size for a fast local oracle screen.",
+    )
     parser.add_argument("--settle-time-s", type=float, default=None, help="Override the loaded-settle duration.")
     parser.add_argument("--residual-settle-s", type=float, default=0.5, help="Post-removal recovery duration.")
     parser.add_argument(
@@ -28,6 +42,11 @@ def parse_args() -> argparse.Namespace:
         type=float,
         default=None,
         help="Optional SCM heightmap capture interval for time-resolved rendering.",
+    )
+    parser.add_argument(
+        "--vertical-guide",
+        action="store_true",
+        help="Constrain the cylinder to vertical translation while it settles under gravity.",
     )
     parser.add_argument("--output-dir", type=Path, default=None)
     return parser.parse_args()
@@ -51,9 +70,12 @@ def main() -> None:
         ),
         smoke=args.smoke,
         timestep_s=args.timestep_s,
+        scm_grid_spacing_m=args.scm_grid_spacing_m,
+        scm_pit_size_m=(tuple(float(value) for value in args.scm_pit_size_m) if args.scm_pit_size_m else None),
         settle_time_s=args.settle_time_s,
         residual_settle_s=args.residual_settle_s,
         capture_interval_s=args.capture_interval_s,
+        vertical_guide=args.vertical_guide,
     )
     print(result["output_dir"])
     print(f"loaded_termination_reason: {result['loaded_termination_reason']}")

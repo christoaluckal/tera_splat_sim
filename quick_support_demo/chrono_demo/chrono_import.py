@@ -7,8 +7,9 @@ def import_chrono():
         import pychrono.vehicle as veh
     except ModuleNotFoundError as exc:
         raise RuntimeError(
-            "PyChrono with vehicle bindings is required. Use: "
-            "conda activate chrono_splat"
+            "PyChrono with vehicle bindings is required. The current chrono_splat "
+            "environment has core bindings only; install or build a full PyChrono "
+            "vehicle-enabled binding before running SCM workflows."
         ) from exc
     return chrono, veh
 

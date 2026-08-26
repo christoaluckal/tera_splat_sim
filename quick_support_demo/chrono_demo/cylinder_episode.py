@@ -81,6 +81,34 @@ def _build_cylinder(system: object, action: CylinderAction, surface_z_m: float) 
     return cylinder
 
 
+def _add_vertical_guide(system: object, terrain: object, cylinder: object, action: CylinderAction) -> object:
+    """Constrain the cylinder to vertical translation in the terrain frame.
+
+    The cylinder remains dynamically loaded by gravity; the guide only removes
+    lateral drift and all rotational degrees of freedom. This keeps the
+    indentation axis-aligned without changing mass or soil calibration inputs.
+    """
+    guide_body = chrono.ChBody()
+    guide_body.SetName("validity_cylinder_vertical_guide")
+    guide_body.SetFixed(True)
+    system.Add(guide_body)
+    guide = chrono.ChLinkLockPrismatic()
+    guide.Initialize(
+        cylinder,
+        guide_body,
+        chrono.ChFramed(
+            chrono.ChVector3d(
+                float(action.center_xy_m[0]),
+                float(action.center_xy_m[1]),
+                float(cylinder.GetPos().z),
+            ),
+            chrono.QUNIT,
+        ),
+    )
+    system.AddLink(guide)
+    return guide, guide_body
+
+
 def _pose_row(body: object, time_s: float, phase: str) -> dict[str, float | str]:
     pos = body.GetPos()
     velocity = body.GetPosDt()
@@ -114,6 +142,7 @@ def _write_episode(
     pose_rows: list[dict[str, float | str]],
     loaded_reason: str,
     smoke: bool,
+    vertical_guide: bool,
     terrain_snapshots: list[tuple[dict[str, float | str | None], np.ndarray]] | None = None,
 ) -> None:
     xs, ys = _heightmap_coordinates(terrain_cfg)
@@ -170,6 +199,7 @@ def _write_episode(
             "timestep_s": float(world_cfg["world"]["timestep_s"]),
             "terrain_model": "SCM",
             "smoke": bool(smoke),
+            "vertical_guide": bool(vertical_guide),
             "soil_parameters": terrain_cfg["soil"],
         },
     }
@@ -203,7 +233,10 @@ def run_cylinder_episode(
     residual_settle_s: float = 0.5,
     timestep_s: float | None = None,
     settle_time_s: float | None = None,
+    scm_grid_spacing_m: float | None = None,
+    scm_pit_size_m: tuple[float, float] | None = None,
     capture_interval_s: float | None = None,
+    vertical_guide: bool = False,
 ) -> dict:
     cfg = load_demo_config()
     world_cfg = cfg["world"]
@@ -212,6 +245,15 @@ def run_cylinder_episode(
         world_cfg["world"]["timestep_s"] = 0.001
         world_cfg["world"]["settle_time_s"] = 0.6
         terrain_cfg["pit"]["grid_spacing_m"] = 0.04
+    if scm_pit_size_m is not None:
+        size_x, size_y = (float(value) for value in scm_pit_size_m)
+        if size_x <= 2.0 * float(action.radius_m) or size_y <= 2.0 * float(action.radius_m):
+            raise ValueError("scm_pit_size_m must exceed the cylinder diameter in both dimensions")
+        terrain_cfg["pit"]["size_m"] = [size_x, size_y]
+    if scm_grid_spacing_m is not None:
+        if scm_grid_spacing_m <= 0.0:
+            raise ValueError("scm_grid_spacing_m must be positive")
+        terrain_cfg["pit"]["grid_spacing_m"] = float(scm_grid_spacing_m)
     if timestep_s is not None:
         if timestep_s <= 0.0:
             raise ValueError("timestep_s must be positive")
@@ -227,6 +269,7 @@ def run_cylinder_episode(
     terrain = build_scm_pit(system, terrain_cfg, visualization_mesh=False)
     initial_heightmap = sample_heightmap(terrain, terrain_cfg)
     cylinder = _build_cylinder(system, action, float(terrain_cfg["pit"]["top_elevation_m"]))
+    guide, guide_body = _add_vertical_guide(system, terrain, cylinder, action) if vertical_guide else (None, None)
 
     dt = float(world_cfg["world"]["timestep_s"])
     max_steps = int(float(world_cfg["world"]["settle_time_s"]) / dt)
@@ -285,6 +328,10 @@ def run_cylinder_episode(
             stable_steps = 0
     loaded_heightmap = sample_heightmap(terrain, terrain_cfg)
 
+    if guide is not None:
+        system.Remove(guide)
+    if guide_body is not None:
+        system.Remove(guide_body)
     system.Remove(cylinder)
     for _ in range(int(float(residual_settle_s) / dt)):
         terrain.Synchronize(system.GetChTime())
@@ -317,6 +364,7 @@ def run_cylinder_episode(
         pose_rows,
         loaded_reason,
         smoke,
+        vertical_guide,
         terrain_snapshots,
     )
     return {"output_dir": str(output_dir), "loaded_termination_reason": loaded_reason}

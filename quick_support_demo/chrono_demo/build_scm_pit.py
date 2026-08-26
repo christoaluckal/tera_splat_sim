@@ -9,15 +9,24 @@ from .difficult_terrain import RollingCourse, build_rolling_mesh
 chrono, veh = import_chrono()
 
 
+def _set_scm_reference_frame(terrain: object, frame: object) -> None:
+    """Support the Chrono SCM frame API across the pinned bindings."""
+    if hasattr(terrain, "SetReferenceFrame"):
+        terrain.SetReferenceFrame(frame)
+    else:
+        terrain.SetPlane(frame)
+
+
 def build_scm_pit(system: object, terrain_cfg: dict, visualization_mesh: bool = True) -> object:
     pit_cfg = terrain_cfg["pit"]
     soil_cfg = terrain_cfg["soil"]
     terrain = veh.SCMTerrain(system, visualization_mesh)
-    terrain.SetPlane(
+    _set_scm_reference_frame(
+        terrain,
         chrono.ChCoordsysd(
             chrono.ChVector3d(0.0, 0.0, float(pit_cfg["top_elevation_m"])),
             chrono.QUNIT,
-        )
+        ),
     )
     terrain.Initialize(
         float(pit_cfg["size_m"][0]),
@@ -51,7 +60,8 @@ def build_rolling_scm_pit(
     # Compensate so the course's tapered zero-height boundary stays at floor Z.
     mesh_reference_height = -float(np.min(initial_heightmap))
     terrain = veh.SCMTerrain(system, visualization_mesh)
-    terrain.SetPlane(
+    _set_scm_reference_frame(
+        terrain,
         chrono.ChCoordsysd(
             chrono.ChVector3d(
                 0.0,
@@ -59,7 +69,7 @@ def build_rolling_scm_pit(
                 float(pit_cfg["top_elevation_m"]) + mesh_reference_height,
             ),
             chrono.QUNIT,
-        )
+        ),
     )
     terrain.Initialize(
         build_rolling_mesh(course, terrain_cfg),
