@@ -48,6 +48,47 @@ OK
 These are unit tests. There is no automated numerical regression test for a
 complete Chrono trial yet.
 
+## Chrono-to-Genesis calibration validation
+
+The active oracle is
+`A0_oracle_guided_offset_5mm_gate6mm_v1`: a guided 1.5 kg cylinder on a
+5 mm SCM grid, loaded at `3.595 s`, followed by a fixed `0.25 s` residual
+observation. Its usable mask contains 14,161 cells.
+
+The companion repository's promoted Genesis bed uses 307,461 particles at
+5 mm on n128. It validates with:
+
+| Metric | Value |
+| --- | ---: |
+| preparation p99 speed | `0.492 mm/s` |
+| H0 RMSE | `0.070 mm` |
+| H0 maximum error | `0.237 mm` |
+| valid cells | `14,161` |
+
+The previous best-known coarse candidate was `E=20 kPa`,
+`phi=18.149 deg`, and `nu=0.100004`. The evidence and actions were:
+
+1. n64 result `jg3b5v3s` matched Chrono cylinder sinkage
+   (`34.051` versus `34.270 mm`) and scored `8.548 mm`;
+2. `vrxqwoe2` added nine valid anchored observations and independently
+   confirmed the low-`nu` basin;
+3. Genesis particle spacing was reduced to 5 mm when moving to n128, preserving
+   the accepted particle-to-grid-cell ratio;
+4. geostatic scale, target, physics, loss, and gates remained unchanged;
+5. the incumbent and two confirmations were replayed at fixed times.
+
+Results:
+
+| Candidate | n64 objective | n128 objective | n128 loaded RMSE | n128 residual-footprint RMSE |
+| --- | ---: | ---: | ---: | ---: |
+| 20.000 kPa / 18.149 deg / 0.100004 | **`8.548 mm`** | **`9.626 mm`** | **`2.142 mm`** | **`14.966 mm`** |
+| 18.110 kPa / 18.984 deg / 0.103989 | `8.605 mm` | `9.833 mm` | `2.188 mm` | `15.290 mm` |
+| 20.186 kPa / 18.485 deg / 0.100693 | `8.643 mm` | `10.041 mm` | `2.316 mm` | `15.449 mm` |
+
+The ordering is stable, and initialization drift is negligible. The current
+failure is residual response: the n128 incumbent is `14.308 mm` too high on
+average inside the footprint after cylinder removal.
+
 ## RGB-D orbit validation
 
 A real offscreen VTK smoke capture rendered two theta rings and four phi values

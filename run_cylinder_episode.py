@@ -29,8 +29,43 @@ def parse_args() -> argparse.Namespace:
         metavar=("SIZE_X_M", "SIZE_Y_M"),
         help="Override SCM patch size for a fast local oracle screen.",
     )
-    parser.add_argument("--settle-time-s", type=float, default=None, help="Override the loaded-settle duration.")
-    parser.add_argument("--residual-settle-s", type=float, default=0.5, help="Post-removal recovery duration.")
+    parser.add_argument(
+        "--settle-time-s",
+        type=float,
+        default=None,
+        help="Deprecated alias for --max-loading-time-s.",
+    )
+    parser.add_argument(
+        "--max-loading-time-s",
+        type=float,
+        default=None,
+        help="Maximum loading duration before a non-converged episode is rejected as an oracle.",
+    )
+    parser.add_argument(
+        "--loading-linear-speed-threshold-mps",
+        type=float,
+        default=0.006,
+        help="Required maximum cylinder linear speed for loading convergence (default: 6 mm/s).",
+    )
+    parser.add_argument(
+        "--loading-angular-speed-threshold-radps",
+        type=float,
+        default=None,
+        help="Required maximum cylinder angular speed for loading convergence (defaults to world config).",
+    )
+    parser.add_argument(
+        "--loading-hold-time-s",
+        type=float,
+        default=0.10,
+        help="Continuous time below both speed thresholds required for loading acceptance (default: 0.10 s).",
+    )
+    parser.add_argument(
+        "--min-loading-time-s",
+        type=float,
+        default=0.25,
+        help="Earliest time at which loading convergence can begin.",
+    )
+    parser.add_argument("--residual-settle-s", type=float, default=0.5, help="Recorded fixed post-removal recovery duration.")
     parser.add_argument(
         "--start-clearance-m",
         type=float,
@@ -73,12 +108,18 @@ def main() -> None:
         scm_grid_spacing_m=args.scm_grid_spacing_m,
         scm_pit_size_m=(tuple(float(value) for value in args.scm_pit_size_m) if args.scm_pit_size_m else None),
         settle_time_s=args.settle_time_s,
+        max_loading_time_s=args.max_loading_time_s,
+        loading_linear_speed_threshold_mps=args.loading_linear_speed_threshold_mps,
+        loading_angular_speed_threshold_radps=args.loading_angular_speed_threshold_radps,
+        loading_hold_time_s=args.loading_hold_time_s,
+        min_loading_time_s=args.min_loading_time_s,
         residual_settle_s=args.residual_settle_s,
         capture_interval_s=args.capture_interval_s,
         vertical_guide=args.vertical_guide,
     )
     print(result["output_dir"])
     print(f"loaded_termination_reason: {result['loaded_termination_reason']}")
+    print(f"loaded_convergence_accepted: {result['loaded_convergence_accepted']}")
 
 
 if __name__ == "__main__":

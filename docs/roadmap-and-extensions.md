@@ -116,15 +116,23 @@ placing ROS logic directly in `make_chrono_3d_video.py`.
 
 The external proposal in
 [`chrono-to-mpm-gaussian-pipeline-proposal-2026-08-12.md`](archive/chrono-to-mpm-gaussian-pipeline-proposal-2026-08-12.md)
-describes the original extension. Its first three interface steps now exist in
-the companion `tera_splat` repository: a full-resolution 10 mm Chrono A0
-episode, an accepted volumetric CPIC Genesis bed restored from complete MPM
-state, and common-grid initial/loaded/residual maps. The Genesis response is
-not yet calibrated, so the next trustworthy sequence is:
+describes the original extension. The companion `tera_splat` repository now
+has:
 
-1. Freeze that A0 action, prepared state, and common 10 mm grid.
-2. Fit effective MPM parameters in stages against the loaded/residual maps.
-3. Validate on held-out loads and locations.
+- an accepted guided 5 mm Chrono A0 oracle with fixed loaded/residual timing;
+- an accepted 307,461-particle, 5 mm-particle/n128 Genesis bed;
+- candidate-specific initialization and no-action stability gates;
+- fixed-time loaded/residual loss and online W&B BayesOpt;
+- three valid n128 candidate replays.
+
+The 20 kPa incumbent has `2.142 mm` loaded RMSE but `14.966 mm`
+residual-footprint RMSE. The next trustworthy sequence is:
+
+1. run a compact n128 study over the existing `E`, `phi`, and `nu`
+   parameters;
+2. determine whether residual retention can improve without losing loaded fit;
+3. if not, record a Genesis Sand constitutive limitation;
+4. only then validate on held-out loads and locations.
 
 Do not initialize MPM from an already-deformed Chrono surface and replay the
 same load as if that were a model comparison.
@@ -147,7 +155,8 @@ Only after an MPM episode is validated:
 | Current SCM proxy | qualitative support and deformation demo |
 | Reduced-order fall (current) | hazard-triggered rigid trunk fall demonstration |
 | Articulated Chrono robot | dynamic stability and controller experiments |
-| A0 Genesis bridge (current) | compatible state/action interface; calibration pending |
+| A0 Genesis bridge (current) | qualified 5 mm oracle, accepted n128 state, stable initialization, and fixed-time response comparison |
+| Current Genesis incumbent | loaded-state fit measured; excessive residual recovery remains |
 | Matched Genesis MPM | calibrated cross-model terrain prediction comparison |
 | Gaussian transfer | physically conditioned visual scene update |
 | Real-sand calibration | claims tied to measured material and robot data |

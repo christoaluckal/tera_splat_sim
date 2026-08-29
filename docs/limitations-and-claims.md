@@ -46,6 +46,14 @@ Spot uses proxy geometry. The PyVista backend currently accepts only Go1.
 SCM parameters were selected for visible deformation. Results are not validated
 against a specific sand, moisture state, packing density, or laboratory test.
 
+### Cross-model residual response is not calibrated
+
+The companion Genesis bridge has a qualified 5 mm Chrono oracle and an
+accepted 5 mm-particle/n128 initial state. Its 20 kPa incumbent reaches
+`2.142 mm` loaded RMSE, but residual-footprint RMSE is `14.966 mm` and
+Genesis is `14.308 mm` too high on average after removal. This supports a
+measured cross-model discrepancy, not a claim of calibrated agreement.
+
 ### Smoke grid is coarse
 
 The reference traversal uses `35 mm` spacing. This is useful for visualization
@@ -95,6 +103,10 @@ The current evidence supports statements such as:
   `0.332 m` skid and rigid-body fall."
 - "The open-loop Go1 visual completed a three-pad rigid course while a fitted
   support plane commanded up to `11.8 deg` of trunk tilt."
+- "A guided 5 mm Chrono cylinder episode supplies a fixed-time oracle over
+  14,161 valid cells."
+- "A ratio-matched 5 mm-particle/n128 Genesis bed passes the documented H0,
+  speed, and no-action initialization gates."
 
 ## Claims not supported now
 
@@ -106,7 +118,7 @@ Do not claim:
 - calibrated prediction of real Go1 sinkage;
 - granular particle simulation;
 - ROS 2 controller integration;
-- Genesis MPM agreement;
+- calibrated Genesis MPM agreement across loaded, residual, and held-out cases;
 - learned Gaussian deformation;
 - an articulated contact-force-caused robot fall;
 - controller-stabilized difficult-terrain locomotion;

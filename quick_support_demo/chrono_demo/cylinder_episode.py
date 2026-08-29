@@ -34,6 +34,18 @@ class CylinderAction:
     removal: str = "remove_body"
 
 
+@dataclass(frozen=True)
+class LoadingConvergence:
+    """Fixed, recorded acceptance rule for a loaded oracle state."""
+
+    min_loading_time_s: float
+    max_loading_time_s: float
+    linear_speed_threshold_mps: float
+    angular_speed_threshold_radps: float
+    hold_time_s: float
+    required_stable_steps: int
+
+
 def _length(vector: object) -> float:
     return float((vector.x * vector.x + vector.y * vector.y + vector.z * vector.z) ** 0.5)
 
@@ -141,6 +153,8 @@ def _write_episode(
     residual_heightmap: np.ndarray,
     pose_rows: list[dict[str, float | str]],
     loaded_reason: str,
+    loading_convergence: dict[str, float | int | bool | None],
+    residual_settle_s: float,
     smoke: bool,
     vertical_guide: bool,
     terrain_snapshots: list[tuple[dict[str, float | str | None], np.ndarray]] | None = None,
@@ -167,6 +181,8 @@ def _write_episode(
         "loaded_sinkage_m": float(pose_rows[0]["z_m"]) - float(loaded_row["z_m"]),
         "loaded_linear_speed_mps": float(loaded_row["linear_speed_mps"]),
         "loaded_angular_speed_radps": float(loaded_row["angular_speed_radps"]),
+        "loaded_convergence": loading_convergence,
+        "residual_recovery": {"fixed_duration_s": float(residual_settle_s)},
         "max_loaded_depression_m": float(np.min(loaded_heightmap - initial_heightmap)),
         "max_residual_depression_m": float(np.min(residual_heightmap - initial_heightmap)),
     }
@@ -200,6 +216,8 @@ def _write_episode(
             "terrain_model": "SCM",
             "smoke": bool(smoke),
             "vertical_guide": bool(vertical_guide),
+            "loading_convergence": loading_convergence,
+            "residual_recovery": {"fixed_duration_s": float(residual_settle_s)},
             "soil_parameters": terrain_cfg["soil"],
         },
     }
@@ -233,6 +251,11 @@ def run_cylinder_episode(
     residual_settle_s: float = 0.5,
     timestep_s: float | None = None,
     settle_time_s: float | None = None,
+    max_loading_time_s: float | None = None,
+    loading_linear_speed_threshold_mps: float = 0.006,
+    loading_angular_speed_threshold_radps: float | None = None,
+    loading_hold_time_s: float = 0.10,
+    min_loading_time_s: float = 0.25,
     scm_grid_spacing_m: float | None = None,
     scm_pit_size_m: tuple[float, float] | None = None,
     capture_interval_s: float | None = None,
@@ -258,10 +281,26 @@ def run_cylinder_episode(
         if timestep_s <= 0.0:
             raise ValueError("timestep_s must be positive")
         world_cfg["world"]["timestep_s"] = float(timestep_s)
+    if settle_time_s is not None and max_loading_time_s is not None:
+        raise ValueError("settle_time_s and max_loading_time_s are aliases; supply only one")
     if settle_time_s is not None:
         if settle_time_s <= 0.0:
             raise ValueError("settle_time_s must be positive")
-        world_cfg["world"]["settle_time_s"] = float(settle_time_s)
+        max_loading_time_s = float(settle_time_s)
+    if max_loading_time_s is None:
+        max_loading_time_s = float(world_cfg["world"]["settle_time_s"])
+    if max_loading_time_s <= 0.0:
+        raise ValueError("max_loading_time_s must be positive")
+    if loading_linear_speed_threshold_mps <= 0.0:
+        raise ValueError("loading_linear_speed_threshold_mps must be positive")
+    if loading_angular_speed_threshold_radps is None:
+        loading_angular_speed_threshold_radps = float(world_cfg["world"]["settle_ang_velocity_radps"])
+    if loading_angular_speed_threshold_radps <= 0.0:
+        raise ValueError("loading_angular_speed_threshold_radps must be positive")
+    if loading_hold_time_s <= 0.0 or min_loading_time_s < 0.0:
+        raise ValueError("loading_hold_time_s must be positive and min_loading_time_s must be non-negative")
+    if min_loading_time_s + loading_hold_time_s > max_loading_time_s:
+        raise ValueError("max_loading_time_s must allow min_loading_time_s plus loading_hold_time_s")
     if capture_interval_s is not None and capture_interval_s <= 0.0:
         raise ValueError("capture_interval_s must be positive")
     system = build_system(world_cfg)
@@ -272,11 +311,18 @@ def run_cylinder_episode(
     guide, guide_body = _add_vertical_guide(system, terrain, cylinder, action) if vertical_guide else (None, None)
 
     dt = float(world_cfg["world"]["timestep_s"])
-    max_steps = int(float(world_cfg["world"]["settle_time_s"]) / dt)
-    linear_threshold = float(world_cfg["world"]["settle_velocity_mps"])
-    angular_threshold = float(world_cfg["world"]["settle_ang_velocity_radps"])
+    convergence = LoadingConvergence(
+        min_loading_time_s=float(min_loading_time_s),
+        max_loading_time_s=float(max_loading_time_s),
+        linear_speed_threshold_mps=float(loading_linear_speed_threshold_mps),
+        angular_speed_threshold_radps=float(loading_angular_speed_threshold_radps),
+        hold_time_s=float(loading_hold_time_s),
+        required_stable_steps=max(1, int(np.ceil(float(loading_hold_time_s) / dt))),
+    )
+    max_steps = int(np.ceil(convergence.max_loading_time_s / dt))
     stable_steps = 0
-    required_stable_steps = max(1, int(0.1 / dt))
+    gate_window_start_s: float | None = None
+    accepted_time_s: float | None = None
     pose_rows = [_pose_row(cylinder, float(system.GetChTime()), "initial")]
     terrain_snapshots: list[tuple[dict[str, float | str | None], np.ndarray]] | None = None
     next_capture_time = float("inf")
@@ -315,18 +361,52 @@ def run_cylinder_episode(
                 )
             )
             next_capture_time += float(capture_interval_s)
-        if (
-            float(system.GetChTime()) > 0.25
-            and float(row["linear_speed_mps"]) < linear_threshold
-            and float(row["angular_speed_radps"]) < angular_threshold
-        ):
+        time_s = float(system.GetChTime())
+        is_below_threshold = (
+            time_s >= convergence.min_loading_time_s
+            and float(row["linear_speed_mps"]) <= convergence.linear_speed_threshold_mps
+            and float(row["angular_speed_radps"]) <= convergence.angular_speed_threshold_radps
+        )
+        if is_below_threshold:
+            if stable_steps == 0:
+                gate_window_start_s = time_s
             stable_steps += 1
-            if stable_steps >= required_stable_steps:
-                loaded_reason = "equilibrium"
+            if stable_steps >= convergence.required_stable_steps:
+                loaded_reason = "converged_speed_hold"
+                accepted_time_s = time_s
                 break
         else:
             stable_steps = 0
+            gate_window_start_s = None
     loaded_heightmap = sample_heightmap(terrain, terrain_cfg)
+    loaded_row = pose_rows[-1]
+    loading_convergence = {
+        "accepted": loaded_reason == "converged_speed_hold",
+        "min_loading_time_s": convergence.min_loading_time_s,
+        "max_loading_time_s": convergence.max_loading_time_s,
+        "linear_speed_threshold_mps": convergence.linear_speed_threshold_mps,
+        "angular_speed_threshold_radps": convergence.angular_speed_threshold_radps,
+        "hold_time_s": convergence.hold_time_s,
+        "required_stable_steps": convergence.required_stable_steps,
+        "gate_window_start_s": gate_window_start_s if accepted_time_s is not None else None,
+        "accepted_time_s": accepted_time_s,
+        "final_sample_time_s": float(loaded_row["time_s"]),
+        "final_linear_speed_mps": float(loaded_row["linear_speed_mps"]),
+        "final_angular_speed_radps": float(loaded_row["angular_speed_radps"]),
+    }
+    if terrain_snapshots is not None:
+        terrain_snapshots.append(
+            (
+                {
+                    "time_s": float(loaded_row["time_s"]),
+                    "phase": "loaded_accepted" if accepted_time_s is not None else "loaded_timeout",
+                    "body_x_m": float(loaded_row["x_m"]),
+                    "body_y_m": float(loaded_row["y_m"]),
+                    "body_z_m": float(loaded_row["z_m"]),
+                },
+                loaded_heightmap.copy(),
+            )
+        )
 
     if guide is not None:
         system.Remove(guide)
@@ -352,6 +432,19 @@ def run_cylinder_episode(
             )
             next_capture_time += float(capture_interval_s)
     residual_heightmap = sample_heightmap(terrain, terrain_cfg)
+    if terrain_snapshots is not None:
+        terrain_snapshots.append(
+            (
+                {
+                    "time_s": float(system.GetChTime()),
+                    "phase": "residual_fixed_time",
+                    "body_x_m": None,
+                    "body_y_m": None,
+                    "body_z_m": None,
+                },
+                residual_heightmap.copy(),
+            )
+        )
     output_dir.mkdir(parents=True, exist_ok=False)
     _write_episode(
         output_dir,
@@ -363,8 +456,14 @@ def run_cylinder_episode(
         residual_heightmap,
         pose_rows,
         loaded_reason,
+        loading_convergence,
+        residual_settle_s,
         smoke,
         vertical_guide,
         terrain_snapshots,
     )
-    return {"output_dir": str(output_dir), "loaded_termination_reason": loaded_reason}
+    return {
+        "output_dir": str(output_dir),
+        "loaded_termination_reason": loaded_reason,
+        "loaded_convergence_accepted": bool(loading_convergence["accepted"]),
+    }

@@ -42,7 +42,7 @@ crossing while a synchronized DEM shows `current - initial` elevation.
 | Closed-loop balance controller | Not implemented |
 | Articulated Chrono leg dynamics | Not implemented |
 | ROS 2 command bridge | Not implemented |
-| Genesis MPM bridge | Implemented in companion `tera_splat`; parameter calibration pending |
+| Genesis MPM bridge | 5 mm oracle, n128 preparation, fixed-time BayesOpt, and three promoted replays verified; residual calibration remains |
 | Gaussian transfer | Proposed only |
 | Rigid offset hazard and reduced-order fall | Implemented |
 | Rigid difficult terrain with completion and trunk tilt | Implemented approximation |
@@ -247,7 +247,7 @@ When documents disagree, use this precedence:
 3. The active documents in this directory.
 4. Dated files in [`archive/`](archive/) for provenance only.
 
-The date-sensitive verified state in this set is August 18, 2026.
+The date-sensitive verified state in this set is August 29, 2026.
 
 ## Legacy and proposal documents
 
@@ -259,8 +259,10 @@ The following files remain useful but are not the canonical current reference:
   state record, including historical trials. It is useful for provenance but
   contains sections that predate velocity gait, tests, and VTK rendering.
 - [`chrono-to-mpm-gaussian-pipeline-proposal-2026-08-12.md`](archive/chrono-to-mpm-gaussian-pipeline-proposal-2026-08-12.md):
-  externally generated extension proposal. Genesis MPM and Gaussian transfer
-  described there are not fully implemented in this repository.
+  original external extension proposal. The companion `tera_splat` repository
+  now implements and validates the Chrono-to-Genesis I/O, n128 prepared bed,
+  fixed-time comparison, and BayesOpt loop. Gaussian transfer remains proposed.
 - [`sim-only-validity-plan-2026-08-17.md`](archive/sim-only-validity-plan-2026-08-17.md):
   the initial cross-model validation plan. Use the companion project's current
   state for the latest completed bridge evidence.
+- [`overview-and-status-through-2026-08-29.md`](archive/overview-and-status-through-2026-08-29.md):
