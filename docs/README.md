@@ -42,7 +42,7 @@ crossing while a synchronized DEM shows `current - initial` elevation.
 | Closed-loop balance controller | Not implemented |
 | Articulated Chrono leg dynamics | Not implemented |
 | ROS 2 command bridge | Not implemented |
-| Genesis MPM bridge | 5 mm oracle, n128 preparation, fixed-time BayesOpt, and three promoted replays verified; residual calibration remains |
+| Genesis MPM bridge | 5 mm oracle, n128 preparation, fixed-time BayesOpt, independently replayed `8.704 mm` incumbent, and retained raw point-cloud/DEM comparison verified; residual calibration remains |
 | Gaussian transfer | Proposed only |
 | Rigid offset hazard and reduced-order fall | Implemented |
 | Rigid difficult terrain with completion and trunk tilt | Implemented approximation |
@@ -247,7 +247,7 @@ When documents disagree, use this precedence:
 3. The active documents in this directory.
 4. Dated files in [`archive/`](archive/) for provenance only.
 
-The date-sensitive verified state in this set is August 29, 2026.
+The date-sensitive verified state in this set is August 30, 2026.
 
 ## Legacy and proposal documents
 

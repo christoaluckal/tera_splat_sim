@@ -49,10 +49,18 @@ against a specific sand, moisture state, packing density, or laboratory test.
 ### Cross-model residual response is not calibrated
 
 The companion Genesis bridge has a qualified 5 mm Chrono oracle and an
-accepted 5 mm-particle/n128 initial state. Its 20 kPa incumbent reaches
-`2.142 mm` loaded RMSE, but residual-footprint RMSE is `14.966 mm` and
-Genesis is `14.308 mm` too high on average after removal. This supports a
-measured cross-model discrepancy, not a claim of calibrated agreement.
+accepted 5 mm-particle/n128 initial state. Its confirmed `20.433 kPa`,
+`14.727 deg`, `0.101895` incumbent reaches `1.864 mm` loaded RMSE, but
+residual-footprint RMSE is `13.678 mm` and Genesis is `12.941 mm` too high on
+average after removal. This supports a measured cross-model discrepancy, not
+a claim of calibrated agreement.
+
+Retained-raw replay `ykep3esa` visualizes that discrepancy with aligned
+isometric surface point clouds and signed 2D DEM error. It is not additional
+confirmation evidence: four residual projection cells exceeded the frozen
+three-cell sparse-bin allowance even though aggregate metrics and p99 map
+agreement were stable. The bound was not relaxed; `r2at0vvb` remains the
+confirmed run.
 
 ### Smoke grid is coarse
 

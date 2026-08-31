@@ -110,9 +110,26 @@ Before n128 promotion, the best valid coarse candidate was
 | 18.110 kPa / 18.984 deg / 0.103989 | `8.605 mm` | `9.833 mm` | `2.188 mm` | `15.290 mm` |
 | 20.186 kPa / 18.485 deg / 0.100693 | `8.643 mm` | `10.041 mm` | `2.316 mm` | `15.449 mm` |
 
-The ordering survives promotion. The 20 kPa candidate remains the incumbent.
-Its n128 residual signed mean is `+14.308 mm`, meaning Genesis recovers too
-much and is too high after removal.
+The ordering survived resolution promotion. Compact n128 study `9on0s14j`
+then improved the objective to `9.131 mm`, and lower-friction boundary study
+`yab3idti` improved it again. Its iteration 011 candidate is now the confirmed
+incumbent after exact replay `r2at0vvb`:
+
+| Candidate | objective | loaded RMSE | residual-footprint RMSE | residual signed mean |
+| --- | ---: | ---: | ---: | ---: |
+| 20.433 kPa / 14.727 deg / 0.101895 | `8.704 mm` | `1.864 mm` | `13.678 mm` | `+12.941 mm` |
+
+The exact replay passed candidate, phase, mask, score, and map-level
+repeatability gates. Genesis still recovers too much and remains too high after
+removal, but initialization and forward execution are consistent.
+
+Retained-raw replay `ykep3esa` generated 78 sampled MPM rollout PLYs, complete
+initial/loaded/residual particle states, aligned surface and raw-particle PCDs,
+compressed comparison arrays, and loaded/residual isometric point-cloud plus
+2D DEM-error figures. Its aggregate result was stable at `8.705 mm`. Four
+residual cells, however, exceeded the frozen three-cell sparse projection-bin
+allowance, so the run is visual evidence only and `r2at0vvb` remains the
+authoritative confirmation.
 
 ## Current interpretation
 
@@ -125,7 +142,8 @@ Verified:
 - no-action stability testing;
 - fixed-time scoring;
 - online W&B BayesOpt;
-- 5 mm-particle/n128 replay.
+- 5 mm-particle/n128 replay and map-level repeatability;
+- retained raw particle states and aligned point-cloud/DEM-error export.
 
 Not yet established:
 
@@ -138,16 +156,13 @@ No further Chrono oracle change is indicated by the current residual mismatch.
 
 ## Next cross-model experiment
 
-Run a compact n128 BayesOpt study in the companion repository, anchored only
-with valid n128 evidence:
-
-- `E = 18--26 kPa`;
-- `phi = 16.5--18.5 deg`;
-- `nu = 0.10--0.13`.
-
-Keep the target, timing, material model, loss, and validity gates unchanged.
-If the existing parameters cannot reduce recovery without spoiling loaded fit,
-record a Genesis Sand constitutive limitation.
+The compact and lower-friction n128 studies are complete, and the aligned
+isometric point-cloud/2D DEM-error comparison is generated. Before another
+BayesOpt sweep, quantify it using radial profiles, center cross-sections,
+signed error, and loaded-to-residual recovery change. Keep the target, timing,
+material model, loss, and validity gates unchanged. Use that evidence to
+choose between a narrow local refinement and a documented Genesis Sand
+constitutive limitation.
 
 Detailed operational rules live in
 [`tera_splat/docs/chrono-oracle-run-contract.md`](../../tera_splat/docs/chrono-oracle-run-contract.md).

@@ -85,9 +85,39 @@ Results:
 | 18.110 kPa / 18.984 deg / 0.103989 | `8.605 mm` | `9.833 mm` | `2.188 mm` | `15.290 mm` |
 | 20.186 kPa / 18.485 deg / 0.100693 | `8.643 mm` | `10.041 mm` | `2.316 mm` | `15.449 mm` |
 
-The ordering is stable, and initialization drift is negligible. The current
-failure is residual response: the n128 incumbent is `14.308 mm` too high on
-average inside the footprint after cylinder removal.
+The ordering was stable during resolution promotion, and initialization drift
+was negligible. Subsequent compact n128 studies `9on0s14j` and `yab3idti`
+improved the same frozen comparison. The current candidate is
+`E=20.432828 kPa`, `phi=14.727053 deg`, `nu=0.101894536`; exact replay
+`r2at0vvb` confirmed objective `8.704 mm`, loaded RMSE `1.864 mm`,
+residual-footprint RMSE `13.678 mm`, and residual signed mean `+12.941 mm`.
+The replay passed the companion repository's map-level repeatability test.
+
+The remaining failure is residual response: Genesis is still `12.941 mm` too
+high on average inside the footprint after cylinder removal.
+
+### Retained raw and comparison evidence
+
+The companion raw replay `ykep3esa` preserved the confirmed candidate's
+candidate-preparation, no-action, initial, loaded, and residual MPM states plus
+78 sampled rollout PLYs. Its visualization bundle contains:
+
+- separate loaded and residual figures with Chrono and Genesis fixed-isometric
+  surface point clouds beside signed 2D DEM-error maps;
+- one combined loaded/residual figure;
+- compressed raw comparison arrays on the common 5 mm grid;
+- six aligned Chrono-grid surface PCDs, each with 14,161 points;
+- initial, loaded, and residual raw Genesis PCDs, each with 307,461 particles.
+
+The point-cloud panels plot surface change from each solver's own initial
+state, in the shared `bed` frame, with no surface interpolation. The signed
+error is Genesis response minus Chrono response.
+
+This is visualization evidence, not a replacement confirmation. The replay
+scored `8.705 mm` and retained p99 map agreement below `0.011 mm`, but four
+residual cells exceeded the frozen 1 mm sparse-bin threshold while the
+allowance is three. The confirmed run remains `r2at0vvb`; no acceptance bound
+was changed after seeing the raw replay.
 
 ## RGB-D orbit validation
 

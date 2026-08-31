@@ -123,14 +123,17 @@ has:
 - an accepted 307,461-particle, 5 mm-particle/n128 Genesis bed;
 - candidate-specific initialization and no-action stability gates;
 - fixed-time loaded/residual loss and online W&B BayesOpt;
-- three valid n128 candidate replays.
+- a confirmed n128 incumbent with independent map-level repeatability.
+- a retained-raw replay with aligned isometric surface point clouds, 2D DEM
+  error, full-particle PCDs, and 78 sampled rollout PLYs.
 
-The 20 kPa incumbent has `2.142 mm` loaded RMSE but `14.966 mm`
-residual-footprint RMSE. The next trustworthy sequence is:
+The confirmed `20.433 kPa / 14.727 deg / 0.101895` incumbent has `1.864 mm`
+loaded RMSE but `13.678 mm` residual-footprint RMSE. The next trustworthy
+sequence is:
 
-1. run a compact n128 study over the existing `E`, `phi`, and `nu`
-   parameters;
-2. determine whether residual retention can improve without losing loaded fit;
+1. quantify the generated spatial loaded/residual comparison with aligned
+   radial and cross-section profiles;
+2. determine whether a narrow local refinement is justified;
 3. if not, record a Genesis Sand constitutive limitation;
 4. only then validate on held-out loads and locations.
 
