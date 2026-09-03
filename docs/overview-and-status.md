@@ -1,6 +1,6 @@
 # Overview and Status
 
-Last verified: 2026-08-29
+Last verified: 2026-09-03
 
 [Documentation index](README.md)
 
@@ -8,7 +8,8 @@ This repository has two distinct roles:
 
 1. the quick-support robot/SCM demonstration;
 2. generation and qualification of the Chrono SCM cylinder oracle consumed by
-   the companion `tera_splat` Genesis calibration.
+   the companion `tera_splat` forward-model calibration. The current baseline
+   is Genesis; Newton is only a planned separate branch.
 
 The chronological overview through 2026-08-29 is archived in
 [overview-and-status-through-2026-08-29.md](archive/overview-and-status-through-2026-08-29.md).
@@ -131,6 +132,20 @@ residual cells, however, exceeded the frozen three-cell sparse projection-bin
 allowance, so the run is visual evidence only and `r2at0vvb` remains the
 authoritative confirmation.
 
+The companion repository has now completed a non-learned diagnosis. Its 16
+unique valid n128 candidates form a four-point loaded/residual Pareto front,
+the incumbent recovery-error RMSE is `9.213 mm` inside the footprint, and
+Genesis `F`/`Jp` changes localize plastic response around the action. A
+controlled 2x2 matrix also found that halving Genesis timestep changes
+residual-footprint RMSE by `+2.325 mm` at n64 and `+1.525 mm` at n128.
+Resolution effects at fixed timestep are smaller (`+0.233` and `-0.566 mm`).
+The follow-up same-state traces localize the preparation failure. At
+`0.5/0.25/0.125 ms`, final p50/p95/p99 speeds are
+`0.100/0.243/0.450`, `0.170/0.360/0.516`, and
+`0.291/0.764/0.986 mm/s`. The dominant fastest population shifts from
+wall/ground settling to almost entirely free-surface uplift; persistent-mover
+median vertical displacement changes from `-3.135` to `+2.555 mm`.
+
 ## Current interpretation
 
 Verified:
@@ -144,25 +159,35 @@ Verified:
 - online W&B BayesOpt;
 - 5 mm-particle/n128 replay and map-level repeatability;
 - retained raw particle states and aligned point-cloud/DEM-error export.
+- Pareto, spatial/recovery, hidden-state, and numerical sensitivity diagnosis.
+- same-state pre-settle speed, localization, and net-drift diagnosis.
 
 Not yet established:
 
 - a Genesis parameter set that jointly matches loaded and residual deformation;
+- Genesis timestep convergence for this complete preparation/rollout pipeline;
 - held-out validation across load mass or position;
 - agreement with measured real sand;
 - Gaussian deformation transfer.
+- any implemented, qualified, or calibrated Newton MPM result.
 
-No further Chrono oracle change is indicated by the current residual mismatch.
+No further Chrono oracle change is indicated by the current residual mismatch
+or by a downstream solver change.
 
 ## Next cross-model experiment
 
-The compact and lower-friction n128 studies are complete, and the aligned
-isometric point-cloud/2D DEM-error comparison is generated. Before another
-BayesOpt sweep, quantify it using radial profiles, center cross-sections,
-signed error, and loaded-to-residual recovery change. Keep the target, timing,
-material model, loss, and validity gates unchanged. Use that evidence to
-choose between a narrow local refinement and a documented Genesis Sand
-constitutive limitation.
+The compact studies and the non-learned diagnosis are complete. Before another
+BayesOpt sweep, correct or ablate the Genesis containment/state-preparation
+mechanism that produces timestep-dependent wall settling and fine-step surface
+uplift. Then rerun the unchanged three-level preparation and response checks.
+Keep the Chrono target, action, observation times, material, loss, and
+acceptance rule unchanged while changing one numerical mechanism at a time.
+
+If the next work occurs on a Newton branch instead, preserve this same Chrono
+episode, action, mask, loaded/residual times, and score definition. Build a
+fresh Newton initial state and validate static containment, timestep/solver
+tolerance, two-way cylinder coupling, and container removal before any new
+calibration. Genesis state and observations are not portable evidence.
 
 Detailed operational rules live in
 [`tera_splat/docs/chrono-oracle-run-contract.md`](../../tera_splat/docs/chrono-oracle-run-contract.md).

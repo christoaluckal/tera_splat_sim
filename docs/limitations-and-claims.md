@@ -62,6 +62,38 @@ three-cell sparse-bin allowance even though aggregate metrics and p99 map
 agreement were stable. The bound was not relaxed; `r2at0vvb` remains the
 confirmed run.
 
+A non-learned diagnosis localizes a `9.213 mm` footprint recovery error and a
+loaded/residual Pareto trade-off, but it also exposes end-to-end timestep
+sensitivity. Halving Genesis timestep changes residual-footprint RMSE by
+`1.525 mm` at n128 and `2.325 mm` at n64. The evidence therefore suggests a
+constitutive recovery limitation but does not yet isolate model form from
+numerical integration/state-preparation effects.
+
+An attempted n128 `0.125 ms` third level could not pass the frozen pre-contact
+equilibrium gate with either a 2 or 4 s preparation cap. Reusing the accepted
+`0.25 ms` prepared state also failed candidate relaxation at `0.125 ms` before
+contact. Consequently there is no third response score or convergence-order
+claim.
+
+Controlled traces from the identical accepted state show why: at `0.5 ms`
+the fastest 1% is wall/ground localized and persistent movers settle
+`-3.135 mm` in median z; at `0.125 ms` the fastest 1% is 99.87%
+free-surface localized and persistent movers rise `+2.555 mm`. Fine-step
+p50/p95/p99 are `0.291/0.764/0.986 mm/s`. This supports a claim of
+timestep-dependent boundary/free-surface preparation dynamics, not uniform
+bulk compaction. It does not support relaxing the gate or claiming numerical
+convergence.
+
+### Newton MPM is not implemented or validated
+
+Newton has been assessed as a viable alternate MPM backend for a separate
+branch, not as a drop-in replacement. This repository does not install or run
+Newton, and there is no Newton prepared state, coupling result, convergence
+study, calibration, or Chrono comparison. Genesis state fields and fitted
+parameters cannot be attributed to Newton. Any Newton result must be qualified
+under the same external Chrono contract with newly generated solver-specific
+evidence.
+
 ### Smoke grid is coarse
 
 The reference traversal uses `35 mm` spacing. This is useful for visualization
@@ -115,6 +147,8 @@ The current evidence supports statements such as:
   14,161 valid cells."
 - "A ratio-matched 5 mm-particle/n128 Genesis bed passes the documented H0,
   speed, and no-action initialization gates."
+- "A controlled two-resolution/two-timestep Genesis matrix exposes material
+  timestep sensitivity and does not yet demonstrate numerical convergence."
 
 ## Claims not supported now
 
@@ -127,6 +161,7 @@ Do not claim:
 - granular particle simulation;
 - ROS 2 controller integration;
 - calibrated Genesis MPM agreement across loaded, residual, and held-out cases;
+- calibrated or validated Newton MPM agreement;
 - learned Gaussian deformation;
 - an articulated contact-force-caused robot fall;
 - controller-stabilized difficult-terrain locomotion;

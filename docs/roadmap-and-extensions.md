@@ -112,7 +112,7 @@ Recommended ROS 2 interfaces:
 ROS 2 packages should wrap the existing motion and simulation APIs rather than
 placing ROS logic directly in `make_chrono_3d_video.py`.
 
-## Priority 5: Chrono to Genesis MPM
+## Priority 5: Chrono to MPM forward models
 
 The external proposal in
 [`chrono-to-mpm-gaussian-pipeline-proposal-2026-08-12.md`](archive/chrono-to-mpm-gaussian-pipeline-proposal-2026-08-12.md)
@@ -126,19 +126,59 @@ has:
 - a confirmed n128 incumbent with independent map-level repeatability.
 - a retained-raw replay with aligned isometric surface point clouds, 2D DEM
   error, full-particle PCDs, and 78 sampled rollout PLYs.
+- a non-learned Pareto/spatial/recovery/`F`/`Jp` diagnostic and controlled 2x2
+  resolution/timestep matrix.
 
 The confirmed `20.433 kPa / 14.727 deg / 0.101895` incumbent has `1.864 mm`
-loaded RMSE but `13.678 mm` residual-footprint RMSE. The next trustworthy
+loaded RMSE but `13.678 mm` residual-footprint RMSE. Halving timestep changes
+the residual metric by `1.525--2.325 mm`. Same-state traces have now
+completed the former localization step: they show wall/ground settling at
+`0.5 ms` and free-surface uplift at `0.125 ms`. The next trustworthy
 sequence is:
 
-1. quantify the generated spatial loaded/residual comparison with aligned
-   radial and cross-section profiles;
-2. determine whether a narrow local refinement is justified;
-3. if not, record a Genesis Sand constitutive limitation;
-4. only then validate on held-out loads and locations.
+1. correct or ablate one containment/state-preparation numerical mechanism
+   while retaining the recorded speed/localization diagnostics and frozen gate;
+2. rerun all three same-state preparations and require consistent spatial and
+   drift behavior before producing a third response score;
+3. if the existing Pareto/recovery mismatch persists after convergence,
+   record a Genesis Sand constitutive limitation;
+4. only then consider local refinement and held-out loads/locations.
+
+Do not add a learned discrepancy network while the numerical forward model is
+not converged.
 
 Do not initialize MPM from an already-deformed Chrono surface and replay the
 same load as if that were a model comparison.
+
+### Planned Newton alternative branch
+
+[Newton v1.5.1](https://github.com/newton-physics/newton/releases) is viable for
+a separate MPM prototype, not a drop-in replacement for the current Genesis
+baseline. Its
+[implicit MPM solver](https://newton-physics.github.io/newton/stable/api/_generated/newton.solvers.SolverImplicitMPM.html)
+supports granular/elasto-plastic particles, and the project includes an
+[MPM/rigid two-way coupling example](https://github.com/newton-physics/newton/blob/main/newton/examples/mpm/example_mpm_twoway_coupling.py).
+The [general coupling path](https://newton-physics.github.io/newton/stable/concepts/coupling.html)
+is experimental, and moving container removal must be tested explicitly for
+the [reported kinematic-wall penetration risk](https://github.com/newton-physics/newton/issues/2697).
+
+Reusable across backends:
+
+- the qualified Chrono oracle, action, timing, and valid mask;
+- surface-map projection, score definition, diagnostics, and visualization;
+- the external manifest and large-output/lightweight-diagnostic separation.
+
+Solver-specific and not reusable as evidence:
+
+- prepared particle state and Genesis `F`/`C`/`Jp` fields;
+- material parameter semantics, bounds, incumbent, and BayesOpt observations;
+- equilibrium/convergence conclusions and rigid-coupling behavior.
+
+The Newton branch should pin Newton/Warp separately, qualify a fresh
+static-container state across timestep and solver tolerance, validate cylinder
+loading and removal, reproduce the external I/O contract, and compare one valid
+response before beginning a fresh calibration. Keep all backend names and
+evidence namespaces explicit.
 
 ## Priority 6: Gaussian scene deformation
 
@@ -158,8 +198,9 @@ Only after an MPM episode is validated:
 | Current SCM proxy | qualitative support and deformation demo |
 | Reduced-order fall (current) | hazard-triggered rigid trunk fall demonstration |
 | Articulated Chrono robot | dynamic stability and controller experiments |
-| A0 Genesis bridge (current) | qualified 5 mm oracle, accepted n128 state, stable initialization, and fixed-time response comparison |
+| A0 Genesis bridge (current baseline) | qualified 5 mm oracle, accepted n128 state, stable initialization, and fixed-time response comparison |
 | Current Genesis incumbent | loaded-state fit measured; excessive residual recovery remains |
-| Matched Genesis MPM | calibrated cross-model terrain prediction comparison |
+| Newton MPM prototype (planned branch) | fresh state, coupling, removal, and external-I/O qualification; no result yet |
+| Matched MPM backend | calibrated cross-model terrain prediction comparison with backend named |
 | Gaussian transfer | physically conditioned visual scene update |
 | Real-sand calibration | claims tied to measured material and robot data |

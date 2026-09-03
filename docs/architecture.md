@@ -253,4 +253,6 @@ position every view.
   device.
 - Chrono Sensor is not required.
 - ROS 2 is not imported anywhere in the current package.
-- Genesis and Gaussian packages are not current runtime dependencies.
+- Genesis, Newton, Warp, and Gaussian packages are not current runtime
+  dependencies. Forward-model backends belong in the companion `tera_splat`
+  repository and should use separately pinned environments.

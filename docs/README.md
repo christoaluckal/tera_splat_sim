@@ -42,7 +42,8 @@ crossing while a synchronized DEM shows `current - initial` elevation.
 | Closed-loop balance controller | Not implemented |
 | Articulated Chrono leg dynamics | Not implemented |
 | ROS 2 command bridge | Not implemented |
-| Genesis MPM bridge | 5 mm oracle, n128 preparation, fixed-time BayesOpt, independently replayed `8.704 mm` incumbent, and retained raw point-cloud/DEM comparison verified; residual calibration remains |
+| Genesis MPM bridge | 5 mm oracle, n128 preparation, fixed-time BayesOpt, replayed `8.704 mm` incumbent, and raw comparison verified; same-state diagnostics localize the failed n128/0.125 ms level to timestep-dependent free-surface uplift, so preparation and response convergence remain |
+| Newton MPM alternative | Assessed as viable for a separate branch; not installed, implemented, calibrated, or validated in this repository |
 | Gaussian transfer | Proposed only |
 | Rigid offset hazard and reduced-order fall | Implemented |
 | Rigid difficult terrain with completion and trunk tilt | Implemented approximation |
@@ -131,7 +132,7 @@ complete system description.
     Known model gaps, invalid interpretations, historical comparability, and
     what can be stated honestly.
 11. [Roadmap and extensions](roadmap-and-extensions.md)
-    Hazard/fall demonstration, articulated dynamics, ROS 2, Genesis MPM, and
+    Hazard/fall demonstration, articulated dynamics, ROS 2, MPM backends, and
     Gaussian scene work.
 12. [Splat RGB-D capture](splat-rgbd-capture.md)
     Multi-level orbit sampling, RGB/depth formats, intrinsics, poses, and
@@ -247,7 +248,7 @@ When documents disagree, use this precedence:
 3. The active documents in this directory.
 4. Dated files in [`archive/`](archive/) for provenance only.
 
-The date-sensitive verified state in this set is August 30, 2026.
+The date-sensitive verified state in this set is September 3, 2026.
 
 ## Legacy and proposal documents
 

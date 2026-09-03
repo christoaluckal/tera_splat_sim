@@ -96,6 +96,51 @@ The replay passed the companion repository's map-level repeatability test.
 The remaining failure is residual response: Genesis is still `12.941 mm` too
 high on average inside the footprint after cylinder removal.
 
+### Non-learned diagnosis and numerical matrix
+
+The companion diagnostic decomposed 16 unique valid n128 observations into a
+four-point loaded/residual Pareto front and generated aligned radial,
+cross-section, recovery, and Genesis `F`/`Jp` summaries. The incumbent's
+footprint recovery-error RMSE is `9.213 mm`; the final nonzero-`Jp` count is
+8,481 particles versus 1,243 initially.
+
+The controlled end-to-end matrix is:
+
+| particles / grid | timestep | loaded RMSE | residual-footprint RMSE |
+| --- | ---: | ---: | ---: |
+| 10 mm / n64 | `0.5 ms` | `2.298 mm` | `13.448 mm` |
+| 10 mm / n64 | `0.25 ms` | `2.979 mm` | `15.773 mm` |
+| 5 mm / n128 | `0.5 ms` | `1.864 mm` | `13.682 mm` |
+| 5 mm / n128 | `0.25 ms` | `2.468 mm` | `15.207 mm` |
+
+All four observations are valid and use the same Chrono action and fixed map
+times. The timestep effect is material at both resolutions, so numerical
+convergence is not demonstrated and a constitutive-only diagnosis is not yet
+supported.
+
+The requested third n128 level at `0.125 ms` produced no eligible score.
+Prepared-bed runs timed out at 2 and 4 s with final p99 speeds of `0.590` and
+`0.621 mm/s`, respectively, while their H0 surface errors still passed.
+Reusing the accepted `0.25 ms` prepared state with a `0.125 ms` downstream
+runtime also failed candidate relaxation before contact. These are rejected
+initialization diagnostics, not response observations.
+
+The subsequent 4 s same-state traces distinguish the motion from uniform bulk
+compaction:
+
+| timestep | final p50 / p95 / p99 | fastest 1% localization | persistent median dz |
+| ---: | ---: | --- | ---: |
+| `0.5 ms` | `0.100 / 0.243 / 0.450 mm/s` | 98.4% wall; 76.7% ground | `-3.135 mm` |
+| `0.25 ms` | `0.170 / 0.360 / 0.516 mm/s` | 97.7% wall; 49.9% surface | `-1.968 mm` |
+| `0.125 ms` | `0.291 / 0.764 / 0.986 mm/s` | 99.87% surface; 58.8% wall | `+2.555 mm` |
+
+Thus the dominant mode changes with timestep from containment settling to
+free-surface uplift/rebound. The fine-step p95 exceeds the frozen gate value,
+so the rejection cannot be dismissed as only a one-percent wall tail.
+Lightweight CSV/JSON/PNG evidence is tracked in
+`tera_splat/diagnostics/pre_settle_timestep_20260903`; large solver states
+remain in the companion `outputs/` tree.
+
 ### Retained raw and comparison evidence
 
 The companion raw replay `ykep3esa` preserved the confirmed candidate's
@@ -321,3 +366,13 @@ and a `430407` byte file. Frames 0, 18, 30, 42,
 54, and 65 were inspected for phase labels, stepping during the turn, final
 heading, framing, the bent DEM footprint track, and rigid-floor foot placement
 at spawn and exit.
+
+## Planned Newton validation boundary
+
+Newton has no current validation result. A separate backend branch must, in
+order, reproduce the frozen geometry with static containment, qualify a fresh
+initial state across timestep/solver settings, validate two-way cylinder
+loading and removal without penetration, emit the same external maps and
+provenance, and compare one valid response to the unchanged Chrono oracle.
+Only then is a fresh Newton calibration admissible; Genesis replays and
+optimizer observations do not satisfy these gates.
