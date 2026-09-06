@@ -367,12 +367,31 @@ and a `430407` byte file. Frames 0, 18, 30, 42,
 heading, framing, the bent DEM footprint track, and rigid-floor foot placement
 at spawn and exit.
 
-## Planned Newton validation boundary
+## Newton preparation and response validation boundary
 
-Newton has no current validation result. A separate backend branch must, in
-order, reproduce the frozen geometry with static containment, qualify a fresh
-initial state across timestep/solver settings, validate two-way cylinder
-loading and removal without penetration, emit the same external maps and
-provenance, and compare one valid response to the unchanged Chrono oracle.
-Only then is a fresh Newton calibration admissible; Genesis replays and
-optimizer observations do not satisfy these gates.
+The companion Newton branch reproduces the full frozen bed geometry with
+static containment and no Genesis state. Its qualified 307,461-particle PIC
+matrix covers `0.5`, `0.25`, and `0.125 ms` plus a tolerance refinement at
+`0.25 ms`. Every speed/H0 gate passes; adjacent DEM differences are `0.0232`
+and `0.0312 mm` RMSE, and the tolerance results are identical.
+
+The branch also executes the exact 1.5 kg guided cylinder action continuously
+from fresh preparation through `3.595 s` loaded and `0.25 s` residual phases.
+It emits the same external maps and provenance plus raw arrays, PLYs, traces,
+impulses, and penetration diagnostics. The corrected contact discretization
+has zero particle centers inside the analytic cylinder throughout the full
+trace. Raw all-cell Chrono RMSE is `2.396 mm` loaded and `2.646 mm` residual.
+Rebuilding from saved particle arrays still adds about `1.157 mm` of settlement,
+so those arrays are not restart-qualified state. This qualifies mechanics and
+I/O at one response timestep, not material prediction. Response convergence
+must precede fresh Newton calibration; Genesis observations do not satisfy it.
+
+The response matrix is specified before running its remaining levels. It uses
+the full continuous path at `0.5`, `0.25`, and `0.125 ms` with fixed smoke
+material, PIC transfer, solver tolerance, contact construction, action,
+observation times, projection, and mask. Each case must retain accepted
+preparation, finite full-support output, and zero analytic center penetration.
+On the common valid mask, every adjacent pair of loaded-minus-initial and
+residual-minus-initial DEMs must remain within `0.5 mm` RMSE and `1.0 mm`
+maximum error; loaded cylinder sinkage must remain within `0.5 mm`. Absolute
+Chrono RMSE is reported as uncalibrated fit, not used as a convergence gate.

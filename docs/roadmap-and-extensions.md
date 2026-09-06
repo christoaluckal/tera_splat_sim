@@ -150,7 +150,7 @@ not converged.
 Do not initialize MPM from an already-deformed Chrono surface and replay the
 same load as if that were a model comparison.
 
-### Planned Newton alternative branch
+### Active Newton alternative branch
 
 [Newton v1.5.1](https://github.com/newton-physics/newton/releases) is viable for
 a separate MPM prototype, not a drop-in replacement for the current Genesis
@@ -174,11 +174,14 @@ Solver-specific and not reusable as evidence:
 - material parameter semantics, bounds, incumbent, and BayesOpt observations;
 - equilibrium/convergence conclusions and rigid-coupling behavior.
 
-The Newton branch should pin Newton/Warp separately, qualify a fresh
-static-container state across timestep and solver tolerance, validate cylinder
-loading and removal, reproduce the external I/O contract, and compare one valid
-response before beginning a fresh calibration. Keep all backend names and
-evidence namespaces explicit.
+The Newton branch now pins Newton/Warp separately and qualifies a fresh
+307,461-particle PIC preparation matrix plus continuous-state, two-way guided
+cylinder loading and removal. It writes backend-labelled initial, loaded, and
+residual arrays, PLYs, DEMs, masks, traces, metrics, gates, and provenance.
+All preparation gates and the full zero-center-penetration mechanics gate pass.
+The next work is response convergence across timestep, followed by a fresh
+Newton-only calibration/evaluation if response consistency holds. Keep all
+backend names and evidence namespaces explicit.
 
 ## Priority 6: Gaussian scene deformation
 
@@ -200,7 +203,7 @@ Only after an MPM episode is validated:
 | Articulated Chrono robot | dynamic stability and controller experiments |
 | A0 Genesis bridge (current baseline) | qualified 5 mm oracle, accepted n128 state, stable initialization, and fixed-time response comparison |
 | Current Genesis incumbent | loaded-state fit measured; excessive residual recovery remains |
-| Newton MPM prototype (planned branch) | fresh state, coupling, removal, and external-I/O qualification; no result yet |
+| Newton MPM prototype (active branch) | PIC preparation and one full coupled mechanics response qualified; response timestep convergence and calibration remain |
 | Matched MPM backend | calibrated cross-model terrain prediction comparison with backend named |
 | Gaussian transfer | physically conditioned visual scene update |
 | Real-sand calibration | claims tied to measured material and robot data |

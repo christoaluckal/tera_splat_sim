@@ -84,15 +84,23 @@ timestep-dependent boundary/free-surface preparation dynamics, not uniform
 bulk compaction. It does not support relaxing the gate or claiming numerical
 convergence.
 
-### Newton MPM is not implemented or validated
+### Newton mechanics are qualified; material response is not validated
 
-Newton has been assessed as a viable alternate MPM backend for a separate
-branch, not as a drop-in replacement. This repository does not install or run
-Newton, and there is no Newton prepared state, coupling result, convergence
-study, calibration, or Chrono comparison. Genesis state fields and fitted
-parameters cannot be attributed to Newton. Any Newton result must be qualified
-under the same external Chrono contract with newly generated solver-specific
-evidence.
+Newton is an alternate MPM backend on a separate branch, not a drop-in
+replacement. The companion branch qualifies a fresh 307,461-particle PIC
+preparation matrix at `0.5`, `0.25`, and `0.125 ms`. All speed/H0 gates pass,
+adjacent DEM RMSE is `0.023/0.031 mm`, and the `0.25 ms` result is unchanged
+between tolerances `1e-4` and `1e-5`.
+
+The exact guided cylinder is then loaded for `3.595 s` and removed for a
+`0.25 s` residual phase in one continuous solver instance. A circumscribed
+128-segment contact mesh and explicit projection/guide settings pass the strict
+zero-center-penetration gate throughout the full run. The result is
+mechanics-qualified with full external I/O, but it remains an uncalibrated
+engineering material at one response timestep. Saved particle arrays omit
+solver grid/warm-start history and are not restart-qualified. There is no
+validated predictive Newton model or calibration; Genesis state fields and
+fitted parameters cannot be attributed to Newton.
 
 ### Smoke grid is coarse
 
@@ -149,6 +157,8 @@ The current evidence supports statements such as:
   speed, and no-action initialization gates."
 - "A controlled two-resolution/two-timestep Genesis matrix exposes material
   timestep sensitivity and does not yet demonstrate numerical convergence."
+- "The Newton branch passes its PIC preparation and guided-cylinder mechanics
+  gates; response timestep convergence and material calibration remain."
 
 ## Claims not supported now
 

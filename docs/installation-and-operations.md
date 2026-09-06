@@ -23,10 +23,11 @@ The PyChrono 8 ProjectChrono build is required by the current code because it
 exposes `pychrono.vehicle.SCMTerrain`. The separately installed conda-forge
 `chrono` package should not be assumed to provide the same Python modules.
 
-Newton and its Warp dependency are not installed or required by this
-repository. If a Newton forward-model branch is created in the companion
-`tera_splat` repository, pin it in a separate environment; the Chrono oracle
-commands and current `chrono_splat` environment remain the reference producer.
+Newton and Warp are not runtime dependencies of this repository. The companion
+`tera_splat` Newton branch uses the separate environment
+`/data/christoa/conda/envs/newton_splat`, currently Python 3.11.15, Newton
+1.5.1, and Warp 1.17.0. The Chrono oracle commands and `chrono_splat`
+environment remain the reference producer.
 
 ## Installation commands
 

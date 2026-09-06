@@ -8,8 +8,8 @@ This repository has two distinct roles:
 
 1. the quick-support robot/SCM demonstration;
 2. generation and qualification of the Chrono SCM cylinder oracle consumed by
-   the companion `tera_splat` forward-model calibration. The current baseline
-   is Genesis; Newton is only a planned separate branch.
+   the companion `tera_splat` forward-model calibration. Genesis is the frozen
+   baseline; Newton integration is active on a separate branch.
 
 The chronological overview through 2026-08-29 is archived in
 [overview-and-status-through-2026-08-29.md](archive/overview-and-status-through-2026-08-29.md).
@@ -161,6 +161,9 @@ Verified:
 - retained raw particle states and aligned point-cloud/DEM-error export.
 - Pareto, spatial/recovery, hidden-state, and numerical sensitivity diagnosis.
 - same-state pre-settle speed, localization, and net-drift diagnosis.
+- fresh Newton full-bed timestep/tolerance preparation diagnostics;
+- continuous-state guided-cylinder loading/removal with initial, loaded, and
+  residual raw/map output and explicit acceptance gates.
 
 Not yet established:
 
@@ -169,7 +172,9 @@ Not yet established:
 - held-out validation across load mass or position;
 - agreement with measured real sand;
 - Gaussian deformation transfer.
-- any implemented, qualified, or calibrated Newton MPM result.
+- Newton response timestep convergence and calibration;
+- validated predictive Newton agreement beyond the one mechanics-qualified,
+  uncalibrated response.
 
 No further Chrono oracle change is indicated by the current residual mismatch
 or by a downstream solver change.
@@ -183,11 +188,19 @@ uplift. Then rerun the unchanged three-level preparation and response checks.
 Keep the Chrono target, action, observation times, material, loss, and
 acceptance rule unchanged while changing one numerical mechanism at a time.
 
-If the next work occurs on a Newton branch instead, preserve this same Chrono
-episode, action, mask, loaded/residual times, and score definition. Build a
-fresh Newton initial state and validate static containment, timestep/solver
-tolerance, two-way cylinder coupling, and container removal before any new
-calibration. Genesis state and observations are not portable evidence.
+The Newton branch preserves this same Chrono episode, action, mask,
+loaded/residual times, and score definition. Its PIC preparation matrix passes
+all timestep/tolerance, speed, H0, and map-consistency gates. Its full two-way
+cylinder/removal run is finite and passes the strict zero-center-penetration
+gate. Next establish response convergence across timestep before calibration
+or a larger evaluation. The frozen check changes only timestep across
+`0.5/0.25/0.125 ms`, compares loaded-minus-initial and residual-minus-initial
+maps, and retains the existing preparation, finite/full-support, and strict
+penetration gates. Its adjacent-level limits are `0.5 mm` DEM RMSE, `1.0 mm`
+maximum DEM error, and `0.5 mm` loaded sinkage difference. Chrono fit is not a
+numerical-convergence criterion. Saved particle arrays are archival output,
+not solver restart checkpoints; Genesis state and observations are not
+portable evidence.
 
 Detailed operational rules live in
 [`tera_splat/docs/chrono-oracle-run-contract.md`](../../tera_splat/docs/chrono-oracle-run-contract.md).

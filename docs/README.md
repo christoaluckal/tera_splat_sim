@@ -43,7 +43,7 @@ crossing while a synchronized DEM shows `current - initial` elevation.
 | Articulated Chrono leg dynamics | Not implemented |
 | ROS 2 command bridge | Not implemented |
 | Genesis MPM bridge | 5 mm oracle, n128 preparation, fixed-time BayesOpt, replayed `8.704 mm` incumbent, and raw comparison verified; same-state diagnostics localize the failed n128/0.125 ms level to timestep-dependent free-surface uplift, so preparation and response convergence remain |
-| Newton MPM alternative | Assessed as viable for a separate branch; not installed, implemented, calibrated, or validated in this repository |
+| Newton MPM alternative | Companion branch has a passed PIC preparation matrix and mechanics-qualified full guided-cylinder/removal response with zero analytic center penetration; response convergence and calibration remain |
 | Gaussian transfer | Proposed only |
 | Rigid offset hazard and reduced-order fall | Implemented |
 | Rigid difficult terrain with completion and trunk tilt | Implemented approximation |
@@ -248,7 +248,7 @@ When documents disagree, use this precedence:
 3. The active documents in this directory.
 4. Dated files in [`archive/`](archive/) for provenance only.
 
-The date-sensitive verified state in this set is September 3, 2026.
+The date-sensitive verified state in this set is September 6, 2026.
 
 ## Legacy and proposal documents
 
@@ -261,8 +261,13 @@ The following files remain useful but are not the canonical current reference:
   contains sections that predate velocity gait, tests, and VTK rendering.
 - [`chrono-to-mpm-gaussian-pipeline-proposal-2026-08-12.md`](archive/chrono-to-mpm-gaussian-pipeline-proposal-2026-08-12.md):
   original external extension proposal. The companion `tera_splat` repository
-  now implements and validates the Chrono-to-Genesis I/O, n128 prepared bed,
-  fixed-time comparison, and BayesOpt loop. Gaussian transfer remains proposed.
+  implements and validates the Chrono-to-Genesis I/O, n128 prepared bed,
+  fixed-time comparison, and BayesOpt loop. Its Newton branch also implements
+  a timestep/tolerance preparation matrix and continuous-state two-way
+  cylinder loading/removal with raw and map-level output. PIC preparation and
+  the full mechanics run now pass their gates; the material remains
+  uncalibrated and response timestep convergence remains. Gaussian transfer is
+  still proposed.
 - [`sim-only-validity-plan-2026-08-17.md`](archive/sim-only-validity-plan-2026-08-17.md):
   the initial cross-model validation plan. Use the companion project's current
   state for the latest completed bridge evidence.
