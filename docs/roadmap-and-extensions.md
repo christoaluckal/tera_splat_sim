@@ -178,10 +178,20 @@ The Newton branch now pins Newton/Warp separately and qualifies a fresh
 307,461-particle PIC preparation matrix plus continuous-state, two-way guided
 cylinder loading and removal. It writes backend-labelled initial, loaded, and
 residual arrays, PLYs, DEMs, masks, traces, metrics, gates, and provenance.
-All preparation gates and the full zero-center-penetration mechanics gate pass.
-The next work is response convergence across timestep, followed by a fresh
-Newton-only calibration/evaluation if response consistency holds. Keep all
-backend names and evidence namespaces explicit.
+All preparation and per-case zero-center-penetration mechanics gates pass.
+Native Kamino/prismatic proxy coupling removes the explicit-guide drift, and
+both adjacent DEM response pairs plus the `1e-6` guide gate pass. A 9.375 mm
+raised-proxy diagnostic subsequently passes the entire 100 kPa response matrix
+and improves the shared objective to `12.189 mm`.
+
+Do not promote that offset: a 25 kPa probe passes preparation but creates up to
+1,330 analytic-cylinder penetrations at `5.950 mm` depth and fails the guide
+gate. The newer full-volume, cylinder-only S2 activation diagnostic preserves
+collision coverage and passes every mechanics row, but does not demonstrate
+the frozen three-level numerical matrix: coarse/medium sinkage is `0.975 mm`
+against a `0.5 mm` gate (medium/fine is `0.480 mm`). Diagnose that sensitivity
+before fresh Newton-only calibration or larger evaluation. Keep all backend
+names and evidence namespaces explicit.
 
 ## Priority 6: Gaussian scene deformation
 
@@ -203,7 +213,7 @@ Only after an MPM episode is validated:
 | Articulated Chrono robot | dynamic stability and controller experiments |
 | A0 Genesis bridge (current baseline) | qualified 5 mm oracle, accepted n128 state, stable initialization, and fixed-time response comparison |
 | Current Genesis incumbent | loaded-state fit measured; excessive residual recovery remains |
-| Newton MPM prototype (active branch) | PIC preparation and one full coupled mechanics response qualified; response timestep convergence and calibration remain |
+| Newton MPM prototype (active branch) | PIC preparation and full-volume mechanics are qualified; the `-0.25`-voxel S2 activation matrix misses only coarse/medium sinkage (`0.975 mm` vs `0.5 mm`), so calibration remains blocked |
 | Matched MPM backend | calibrated cross-model terrain prediction comparison with backend named |
 | Gaussian transfer | physically conditioned visual scene update |
 | Real-sand calibration | claims tied to measured material and robot data |

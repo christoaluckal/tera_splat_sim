@@ -102,6 +102,38 @@ solver grid/warm-start history and are not restart-qualified. There is no
 validated predictive Newton model or calibration; Genesis state fields and
 fitted parameters cannot be attributed to Newton.
 
+The clean `0.5/0.25/0.125 ms` matrix is complete and every case passes those
+individual mechanics gates, but response convergence is not demonstrated.
+Loaded sinkage changes `8.854 -> -0.578 -> -5.607 mm`. The collected contact
+impulse balances weight while endpoint velocity remains near `-g*dt`, showing
+that the explicit pre-impulse guide position update accumulates a first-order
+`g*T*dt` error. This coupling integration must be corrected and the unchanged
+matrix rerun before material calibration.
+
+The controlled correction now uses Newton's native `SolverCoupledProxy`, a
+Kamino rigid cylinder, and a world-anchored prismatic joint. It removes the
+dominant drift: endpoint speed is below `0.010 mm/s`, both adjacent DEM pairs
+pass, and every preparation, finite/full-support, penetration, and guide gate
+passes. A later 9.375 mm raised-proxy diagnostic passes the full 100 kPa
+response matrix, including sinkage, and scores `12.189 mm`.
+
+This does not validate the proxy offset as a collision model. A 25 kPa probe
+passes preparation but puts 1,330 particle centers inside the analytic
+cylinder by up to `5.950 mm` and fails the guide gate.
+
+A subsequent full-volume diagnostic preserves the analytic cylinder and its
+zero collision-bottom inset.  A process-local, Newton-1.5.1-locked,
+cylinder-only S2 rasterizer adapter changes node activation from `+0.25` to
+`-0.25` voxel; it does not change signed-distance geometry, action, strict
+center-penetration checks, Chrono I/O, loss, or acceptance gates.  All three
+rows pass preparation, finite/full-support output, guide, and zero-center
+penetration gates.  Both adjacent response-map comparisons pass.  The full
+matrix is nevertheless `not_demonstrated`: coarse/medium sinkage is
+`0.975 mm` above the unchanged `0.5 mm` limit, while medium/fine is
+`0.480 mm` and passes.  Newton material calibration remains blocked while
+that sensitivity is diagnosed.  The preceding paragraph is retained as the
+superseded explicit-coupling diagnosis.
+
 ### Smoke grid is coarse
 
 The reference traversal uses `35 mm` spacing. This is useful for visualization
@@ -157,8 +189,9 @@ The current evidence supports statements such as:
   speed, and no-action initialization gates."
 - "A controlled two-resolution/two-timestep Genesis matrix exposes material
   timestep sensitivity and does not yet demonstrate numerical convergence."
-- "The Newton branch passes its PIC preparation and guided-cylinder mechanics
-  gates; response timestep convergence and material calibration remain."
+- "The Newton branch passes PIC preparation and a 100 kPa support-offset
+  response matrix, but the offset loses analytic collision coverage under a
+  softer material and is not a production forward model."
 
 ## Claims not supported now
 

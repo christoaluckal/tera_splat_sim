@@ -1,6 +1,6 @@
 # Overview and Status
 
-Last verified: 2026-09-03
+Last verified: 2026-09-11
 
 [Documentation index](README.md)
 
@@ -163,7 +163,15 @@ Verified:
 - same-state pre-settle speed, localization, and net-drift diagnosis.
 - fresh Newton full-bed timestep/tolerance preparation diagnostics;
 - continuous-state guided-cylinder loading/removal with initial, loaded, and
-  residual raw/map output and explicit acceptance gates.
+  residual raw/map output and explicit acceptance gates;
+- complete native Kamino/prismatic Newton response matrix and controlled
+  collider-support basis diagnosis;
+- a 100 kPa, 9.375 mm raised-proxy diagnostic matrix at
+  `0.5/0.25/0.125 ms`; every mechanics and response gate passes, with fine
+  sinkage difference `0.032 mm`;
+- a 25 kPa stiffness-only preparation matrix that passes, followed by a
+  rejected response with 1,330 analytic-cylinder penetrations up to
+  `5.950 mm`.
 
 Not yet established:
 
@@ -172,9 +180,12 @@ Not yet established:
 - held-out validation across load mass or position;
 - agreement with measured real sand;
 - Gaussian deformation transfer.
-- Newton response timestep convergence and calibration;
-- validated predictive Newton agreement beyond the one mechanics-qualified,
-  uncalibrated response.
+- full three-level Newton response convergence with a full analytic collision
+  volume: the current cylinder-only S2 activation diagnostic passes mechanics
+  and both map comparisons, but coarse/medium sinkage is `0.975 mm` against
+  the unchanged `0.5 mm` gate;
+- Newton material calibration and validated predictive agreement after that
+  sensitivity is resolved.
 
 No further Chrono oracle change is indicated by the current residual mismatch
 or by a downstream solver change.
@@ -190,17 +201,28 @@ acceptance rule unchanged while changing one numerical mechanism at a time.
 
 The Newton branch preserves this same Chrono episode, action, mask,
 loaded/residual times, and score definition. Its PIC preparation matrix passes
-all timestep/tolerance, speed, H0, and map-consistency gates. Its full two-way
-cylinder/removal run is finite and passes the strict zero-center-penetration
-gate. Next establish response convergence across timestep before calibration
-or a larger evaluation. The frozen check changes only timestep across
-`0.5/0.25/0.125 ms`, compares loaded-minus-initial and residual-minus-initial
-maps, and retains the existing preparation, finite/full-support, and strict
-penetration gates. Its adjacent-level limits are `0.5 mm` DEM RMSE, `1.0 mm`
-maximum DEM error, and `0.5 mm` loaded sinkage difference. Chrono fit is not a
-numerical-convergence criterion. Saved particle arrays are archival output,
-not solver restart checkpoints; Genesis state and observations are not
-portable evidence.
+all timestep/tolerance, speed, H0, and map-consistency gates. Native
+Kamino/prismatic proxy coupling removes the explicit guide drift. A 9.375 mm
+raised-proxy diagnostic then passes the full 100 kPa response matrix, including
+adjacent loaded/residual DEM and sinkage gates; the fine sinkage difference is
+`0.032 mm`. Its corrected A/B objective is `12.189 mm` versus matched
+Genesis `14.736 mm`; calibrated Genesis remains better at `8.705 mm`.
+
+That inset is not promotable. A qualified 25 kPa preparation followed by the
+same response improves the DEM-only objective to `11.207 mm`, but up to 1,330
+particle centers occupy the analytic cylinder by `5.950 mm` and the guide
+gate fails. The raised proxy has removed collision coverage from the lower
+analytic cylinder.
+
+The follow-up full-volume S2 activation diagnosis retains the analytic
+cylinder and zero inset.  Its version-locked, cylinder-only `-0.25`-voxel
+activation setting passes all individual mechanics gates at `0.5/0.25/0.125
+ms`; both adjacent loaded/residual map pairs pass.  It is not yet a calibration
+basis because coarse/medium sinkage is `0.975 mm` versus the frozen `0.5 mm`
+limit, although medium/fine sinkage is `0.480 mm` and passes.  Diagnose that
+sensitivity without changing Chrono I/O, loss, or gates.  Chrono fit is not a
+numerical gate, saved particle arrays remain archival rather than
+restart-qualified, and Genesis state/observations are not portable evidence.
 
 Detailed operational rules live in
 [`tera_splat/docs/chrono-oracle-run-contract.md`](../../tera_splat/docs/chrono-oracle-run-contract.md).

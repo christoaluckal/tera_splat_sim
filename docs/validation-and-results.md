@@ -395,3 +395,96 @@ On the common valid mask, every adjacent pair of loaded-minus-initial and
 residual-minus-initial DEMs must remain within `0.5 mm` RMSE and `1.0 mm`
 maximum error; loaded cylinder sinkage must remain within `0.5 mm`. Absolute
 Chrono RMSE is reported as uncalibrated fit, not used as a convergence gate.
+
+The clean matrix from companion commit `73eb472` completed at all three
+levels. Every case is finite, supports all `14,161` cells, passes preparation,
+and has zero analytic center penetration, but response convergence is
+`not_demonstrated`. Sinkage is `8.854`, `-0.578`, and `-5.607 mm`. The
+coarse pair has loaded/residual response RMSE `1.349/1.373 mm` and a
+`9.432 mm` sinkage difference. The fine pair passes the map gates at
+`0.105/0.084 mm` RMSE but still differs by `5.029 mm` in sinkage.
+
+Steady contact impulse divided by timestep is approximately the correct
+`14.715 N` weight at every level, but endpoint velocity is nearly `-g*dt`.
+The pre-impulse guide position update therefore accumulates approximately
+`g*T*dt` displacement. This is the next controlled correction; the oracle and
+external map I/O do not need to change.
+
+The next two blocks are pre-support-correction baselines retained for
+chronological provenance; the dated follow-up below supersedes their status.
+
+The controlled native-coupling rerun is also complete. A Kamino cylinder on a
+world-anchored prismatic joint couples to unchanged implicit MPM through two
+lagged proxy iterations. All three cases pass preparation, finite/full-support
+I/O, zero-center penetration, and a `1e-6` guide gate. Both adjacent loaded and
+residual DEM pairs pass at `0.082--0.089 mm` RMSE with maximum below
+`0.745 mm`, and endpoint speed is below `0.010 mm/s`. The matrix remains
+`not_demonstrated` only because fine-pair sinkage differs by `0.586819 mm`,
+`0.086819 mm` above the frozen gate. The resulting `9.8--10.8 mm` analytic
+support gap makes collider support/proxy sensitivity the next controlled
+diagnosis; external Chrono/DEM I/O remains unchanged.
+
+### Newton versus Genesis backend A/B (pre-support baseline)
+
+The companion repository also completed a shared-score `0.5 ms` comparison.
+At nominally matched `100 kPa`, `nu=0.2`, and density `1000 kg/m^3`, with
+Newton `mu=0.68` converted to Genesis `phi=34.216 deg`, Newton scores
+`12.638 mm` versus Genesis `14.736 mm` under loaded all-cell RMSE plus half
+the residual-footprint RMSE. Genesis was about 16% faster in the single
+matched execution. Newton is quieter at the fixed residual sample, but its
+known analytic collider-support gap remains.
+
+The calibrated Genesis incumbent remains the best current absolute fit at
+`8.705 mm`. Transferring its nominal material scalars into Newton is not
+valid: the full Newton preparation failed the frozen H0 gate before contact
+at `9.809 mm` RMSE and `10.241 mm` maximum error. The A/B therefore favors
+Newton's numerical foundation but does not establish predictive superiority
+before Newton-specific contact diagnosis and calibration. The tracked report
+is `tera_splat/diagnostics/backend_ab_20260906/`.
+
+### Newton support correction follow-up (2026-09-10)
+
+This supersedes the open Newton support/convergence action above. Global Q1
+and particle-PIC collider substitutions were rejected on preparation evidence.
+A cylinder-only 9.375 mm raised-proxy diagnostic, with Kamino PADMM tolerance
+tightened to the existing `1e-6` guide gate, passes the complete
+`0.5/0.25/0.125 ms` response matrix at 100 kPa. All preparation,
+finite/full-support, guide, zero-center-penetration, invariant, adjacent DEM,
+and sinkage gates pass. Loaded/residual pairwise DEM RMSE is
+`0.130/0.123 mm` and `0.107/0.110 mm`; sinkage differences are
+`0.130/0.032 mm`.
+
+The corrected shared-score result is `12.189 mm`, improving the original
+Newton result by `0.449 mm`, versus matched Genesis `14.736 mm`. The
+calibrated Genesis incumbent remains better at `8.705 mm`.
+
+The first Newton-only calibration probe changed stiffness from 100 to 25 kPa.
+Its preparation matrix passes and its DEM-only score would improve to
+`11.207 mm`, but the response is rejected: up to 1,330 particle centers enter
+the analytic cylinder by `5.950 mm`, and the guide gate fails. The raised
+proxy omits a lower slice of the analytic collision volume once the cylinder
+sinks. It is therefore diagnostic, not a production forward model. Newton
+material calibration and large evaluation remain blocked until support can be
+corrected while retaining full analytic collision coverage. The Chrono oracle
+and its I/O contract remain unchanged.
+
+### Newton full-volume contact activation (2026-09-11)
+
+The follow-up keeps the analytic cylinder and zero collision-bottom inset.  A
+process-local, cylinder-only adapter changes Newton 1.5.1 S2 contact-node
+activation from the native `+0.25` to `-0.25` voxel; signed-distance geometry,
+action, mass/inertia, strict particle-center containment, Chrono I/O, loss,
+and gates are unchanged.  The full `0.5/0.25/0.125 ms` matrix at 100 kPa has
+accepted preparation, finite 14,161-cell output, a passed guide gate, and zero
+center penetration in every row.
+
+Both adjacent loaded/residual DEM comparisons pass their `0.5 mm` RMSE and
+`1.0 mm` maximum limits.  Coarse/medium has `0.149/0.130 mm` RMSE and
+`0.911/0.752 mm` maximum error, but its `0.975 mm` sinkage difference exceeds
+the unchanged `0.5 mm` limit.  Medium/fine passes completely with
+`0.122/0.124 mm` RMSE, `0.781/0.730 mm` maximum error, and `0.480 mm`
+sinkage difference.  The matrix status is therefore `not_demonstrated`; this
+is full-volume mechanics evidence, not Newton material calibration or a
+license to relax the gate.  Tracked compact evidence is
+`tera_splat/diagnostics/newton_contact_activation_20260910/`; raw artifacts
+remain under `tera_splat/outputs/`.
