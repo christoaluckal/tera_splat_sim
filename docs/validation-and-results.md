@@ -488,3 +488,20 @@ is full-volume mechanics evidence, not Newton material calibration or a
 license to relax the gate.  Tracked compact evidence is
 `tera_splat/diagnostics/newton_contact_activation_20260910/`; raw artifacts
 remain under `tera_splat/outputs/`.
+
+### Stock public-contact follow-up (2026-09-14)
+
+The private activation adapter is now diagnostic-only. Stock Newton contact
+with public `4` proxy iterations and `8` rigid substeps passes the original
+grid's coarse/medium response pair: loaded/residual RMSE is `0.053/0.053 mm`
+and sinkage difference is `0.192 mm`. Its analytic bottom nevertheless stays
+`10.632/10.823 mm` above the initial surface, so it is not a calibration model.
+
+Halving only the public voxel size to `7.8125 mm` passes fresh
+`0.5/0.25/0.125 ms` preparation plus the `0.25 ms` tolerance refinement. Its
+stock-contact cylinder pair is mechanics-qualified and reduces loaded bottom
+bias to `2.195/3.535 mm`; loaded/residual map RMSE remains `0.096/0.081 mm`.
+However, sinkage differs by `1.339 mm`, failing the unchanged `0.5 mm` gate.
+The fine response was correctly not run. The next public-only test is `8/16`
+coupling at this refined grid; neither material calibration nor a Newton
+BayesOpt study is eligible.

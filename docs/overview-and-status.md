@@ -1,6 +1,6 @@
 # Overview and Status
 
-Last verified: 2026-09-11
+Last verified: 2026-09-14
 
 [Documentation index](README.md)
 
@@ -181,9 +181,10 @@ Not yet established:
 - agreement with measured real sand;
 - Gaussian deformation transfer.
 - full three-level Newton response convergence with a full analytic collision
-  volume: the current cylinder-only S2 activation diagnostic passes mechanics
-  and both map comparisons, but coarse/medium sinkage is `0.975 mm` against
-  the unchanged `0.5 mm` gate;
+  volume. The historical private cylinder-only S2 activation diagnostic passes
+  mechanics and both map comparisons, but coarse/medium sinkage is `0.975 mm`
+  against the unchanged `0.5 mm` gate; the active public-only route has its
+  own unresolved refined-grid sinkage failure;
 - Newton material calibration and validated predictive agreement after that
   sensitivity is resolved.
 
@@ -223,6 +224,15 @@ limit, although medium/fine sinkage is `0.480 mm` and passes.  Diagnose that
 sensitivity without changing Chrono I/O, loss, or gates.  Chrono fit is not a
 numerical gate, saved particle arrays remain archival rather than
 restart-qualified, and Genesis state/observations are not portable evidence.
+
+The private activation adapter is not the active forward-model path.  Stock
+Newton contact with public `4/8` coupling passes its coarse/medium response
+pair at the original grid, but leaves a 10--11 mm contact-location bias.
+Halving only the public voxel size to `7.8125 mm` reduces that bias to
+2.195/3.535 mm and passes a fresh full preparation matrix, but its cylinder
+pair fails the sinkage gate at `1.339 mm`.  Newton calibration and BayesOpt
+remain blocked; the next controlled public setting is `8/16` coupling at the
+refined grid.
 
 Detailed operational rules live in
 [`tera_splat/docs/chrono-oracle-run-contract.md`](../../tera_splat/docs/chrono-oracle-run-contract.md).

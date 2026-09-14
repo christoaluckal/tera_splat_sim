@@ -134,6 +134,19 @@ matrix is nevertheless `not_demonstrated`: coarse/medium sinkage is
 that sensitivity is diagnosed.  The preceding paragraph is retained as the
 superseded explicit-coupling diagnosis.
 
+### Stock public contact remains unqualified for calibration
+
+Private activation overrides are diagnostic evidence only.  With unmodified
+Newton contact and public `4/8` coupling, the original `15.625 mm` voxel grid
+passes the coarse/medium mechanics and response pair, but the analytic cylinder
+bottom remains 10--11 mm above the initial surface. A public `7.8125 mm` grid
+passes a fresh full preparation/tolerance matrix and reduces that bias to
+2.195/3.535 mm. Its mechanics and map pair pass, but its `1.339 mm`
+coarse/medium sinkage difference fails the unchanged `0.5 mm` gate. This does
+not support a Newton calibration, BayesOpt study, or predictive comparison.
+The next allowed test is public `8/16` coupling at the refined grid, not an
+internal rasterizer modification.
+
 ### Smoke grid is coarse
 
 The reference traversal uses `35 mm` spacing. This is useful for visualization
