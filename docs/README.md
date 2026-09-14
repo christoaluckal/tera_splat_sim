@@ -43,7 +43,7 @@ crossing while a synchronized DEM shows `current - initial` elevation.
 | Articulated Chrono leg dynamics | Not implemented |
 | ROS 2 command bridge | Not implemented |
 | Genesis MPM bridge | 5 mm oracle, n128 preparation, fixed-time BayesOpt, replayed `8.704 mm` incumbent, and raw comparison verified; same-state diagnostics localize the failed n128/0.125 ms level to timestep-dependent free-surface uplift, so preparation and response convergence remain |
-| Newton MPM alternative | Active path uses stock Newton contact and public settings only. `4/8` coupling is timestep-consistent at the original grid but has a 10--11 mm contact bias; the `7.8125 mm` public grid reduces bias to 2.2--3.5 mm but fails coarse/medium sinkage (`1.339 mm`), so BayesOpt remains blocked |
+| Newton MPM alternative | Public stock-contact `7.8125 mm`, `8/16` configuration passes the full `0.5/0.25/0.125 ms` response matrix and defines an uncalibrated fixed simulator domain eligible for a separate sim-only BayesOpt study |
 | Gaussian transfer | Proposed only |
 | Rigid offset hazard and reduced-order fall | Implemented |
 | Rigid difficult terrain with completion and trunk tilt | Implemented approximation |

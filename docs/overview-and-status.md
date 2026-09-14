@@ -225,14 +225,17 @@ sensitivity without changing Chrono I/O, loss, or gates.  Chrono fit is not a
 numerical gate, saved particle arrays remain archival rather than
 restart-qualified, and Genesis state/observations are not portable evidence.
 
-The private activation adapter is not the active forward-model path.  Stock
-Newton contact with public `4/8` coupling passes its coarse/medium response
-pair at the original grid, but leaves a 10--11 mm contact-location bias.
-Halving only the public voxel size to `7.8125 mm` reduces that bias to
-2.195/3.535 mm and passes a fresh full preparation matrix, but its cylinder
-pair fails the sinkage gate at `1.339 mm`.  Newton calibration and BayesOpt
-remain blocked; the next controlled public setting is `8/16` coupling at the
-refined grid.
+The private activation adapter is not the active forward-model path. Stock
+Newton contact with public `4/8` coupling remains historical diagnostic
+evidence: the original grid has a 10--11 mm contact-location bias and the
+refined grid misses the sinkage gate by `1.339 mm`. Increasing only public
+coupling effort to `8/16` at `7.8125 mm` now passes the complete
+`0.5/0.25/0.125 ms` response matrix. All mechanics gates pass; adjacent map
+RMSE is at most `0.058 mm`, maximum difference at most `0.310 mm`, and
+sinkage difference at most `0.422 mm`. This establishes an uncalibrated,
+fixed Newton simulator domain for a separate sim-only BayesOpt study. The
+oracle, I/O, timing, mask, and score remain unchanged; Genesis observations
+and material semantics are not portable.
 
 Detailed operational rules live in
 [`tera_splat/docs/chrono-oracle-run-contract.md`](../../tera_splat/docs/chrono-oracle-run-contract.md).

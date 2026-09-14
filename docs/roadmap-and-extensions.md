@@ -194,10 +194,11 @@ before fresh Newton-only calibration or larger evaluation. Keep all backend
 names and evidence namespaces explicit.
 
 The active Newton route no longer promotes private activation overrides. Stock
-contact with public `4/8` coupling is stable on the original grid but has a
-10--11 mm contact bias; a `7.8125 mm` public grid reduces that to 2.2--3.5 mm
-but fails coarse/medium sinkage by `1.339 mm`. Test public `8/16` coupling at
-the refined grid before any Newton BayesOpt work.
+contact at `7.8125 mm` with public `8/16` coupling now passes its complete
+three-level response matrix, while the earlier `4/8` variants remain
+diagnostic failures. The next Newton milestone is an isolated fixed-domain
+BayesOpt runner: fresh candidate-specific preparation, unchanged Chrono I/O
+and score, Newton-native material bounds, and backend-separated observations.
 
 ## Priority 6: Gaussian scene deformation
 

@@ -134,18 +134,21 @@ matrix is nevertheless `not_demonstrated`: coarse/medium sinkage is
 that sensitivity is diagnosed.  The preceding paragraph is retained as the
 superseded explicit-coupling diagnosis.
 
-### Stock public contact remains unqualified for calibration
+### Stock public contact has a qualified numerical domain, not a calibration
 
-Private activation overrides are diagnostic evidence only.  With unmodified
-Newton contact and public `4/8` coupling, the original `15.625 mm` voxel grid
-passes the coarse/medium mechanics and response pair, but the analytic cylinder
-bottom remains 10--11 mm above the initial surface. A public `7.8125 mm` grid
-passes a fresh full preparation/tolerance matrix and reduces that bias to
-2.195/3.535 mm. Its mechanics and map pair pass, but its `1.339 mm`
-coarse/medium sinkage difference fails the unchanged `0.5 mm` gate. This does
-not support a Newton calibration, BayesOpt study, or predictive comparison.
-The next allowed test is public `8/16` coupling at the refined grid, not an
-internal rasterizer modification.
+Private activation overrides are diagnostic evidence only. With unmodified
+Newton contact, the `7.8125 mm`, public `8/16` configuration passes the full
+`0.5/0.25/0.125 ms` response matrix: adjacent map RMSE is at most `0.058 mm`,
+maximum cell difference at most `0.310 mm`, and sinkage difference at most
+`0.422 mm`; all mechanics gates also pass. It supports a separately labelled,
+fixed-domain sim-only Newton BayesOpt study. Each study must lock one validated
+timestep and all numerical settings across its candidates.
+
+This does not support a Newton material calibration or predictive comparison.
+The fixed 100 kPa smoke material still has `3.822--3.905 mm` all-cell Chrono
+response RMSE, and first significant contact is `5.701--5.959 mm` above the
+initial surface. The result has no real-sand validation, is not transferable to
+untested solver settings, and cannot merge Genesis state or observations.
 
 ### Smoke grid is coarse
 

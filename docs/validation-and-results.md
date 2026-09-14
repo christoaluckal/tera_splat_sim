@@ -499,9 +499,16 @@ and sinkage difference is `0.192 mm`. Its analytic bottom nevertheless stays
 
 Halving only the public voxel size to `7.8125 mm` passes fresh
 `0.5/0.25/0.125 ms` preparation plus the `0.25 ms` tolerance refinement. Its
-stock-contact cylinder pair is mechanics-qualified and reduces loaded bottom
-bias to `2.195/3.535 mm`; loaded/residual map RMSE remains `0.096/0.081 mm`.
-However, sinkage differs by `1.339 mm`, failing the unchanged `0.5 mm` gate.
-The fine response was correctly not run. The next public-only test is `8/16`
-coupling at this refined grid; neither material calibration nor a Newton
-BayesOpt study is eligible.
+stock-contact `4/8` cylinder pair is mechanics-qualified but has a `1.339 mm`
+sinkage difference, so it remains rejected. Increasing only public coupling
+effort to `8/16` completes the refined-grid response matrix successfully:
+
+| Pair | loaded / residual RMSE | loaded / residual maximum | sinkage difference |
+| --- | ---: | ---: | ---: |
+| `0.5 -> 0.25 ms` | `0.035 / 0.035 mm` | `0.218 / 0.213 mm` | `0.331 mm` |
+| `0.25 -> 0.125 ms` | `0.058 / 0.054 mm` | `0.304 / 0.310 mm` | `0.422 mm` |
+
+All three levels pass preparation, finite/full-mask I/O, guide, and strict
+zero-center-penetration gates. This qualifies a fixed, public Newton
+simulation domain for a separate sim-only BayesOpt study, not the 100 kPa
+smoke material as a calibration or a predictive real-sand model.
