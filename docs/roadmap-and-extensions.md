@@ -196,9 +196,11 @@ names and evidence namespaces explicit.
 The active Newton route no longer promotes private activation overrides. Stock
 contact at `7.8125 mm` with public `8/16` coupling now passes its complete
 three-level response matrix, while the earlier `4/8` variants remain
-diagnostic failures. The next Newton milestone is an isolated fixed-domain
-BayesOpt runner: fresh candidate-specific preparation, unchanged Chrono I/O
-and score, Newton-native material bounds, and backend-separated observations.
+diagnostic failures. The isolated fixed-domain local runner is implemented and
+has five valid observations. Next, independently replay the current `11.610 mm`
+best candidate before adding proposals; only then assess whether the inferred
+material/map outputs are useful for a pre-traversal decision. NVS geometry
+integration remains a separate unstarted validation step.
 
 ## Priority 6: Gaussian scene deformation
 

@@ -150,6 +150,12 @@ response RMSE, and first significant contact is `5.701--5.959 mm` above the
 initial surface. The result has no real-sand validation, is not transferable to
 untested solver settings, and cannot merge Genesis state or observations.
 
+
+A local five-observation Newton study improves its numerical objective from
+`12.698` to `11.610 mm`, but this is not optimizer convergence, an independent
+best-point replay, calibrated material inference, or evidence that NVS-derived
+geometry supports a pre-traversal decision.
+
 ### Smoke grid is coarse
 
 The reference traversal uses `35 mm` spacing. This is useful for visualization

@@ -237,5 +237,13 @@ fixed Newton simulator domain for a separate sim-only BayesOpt study. The
 oracle, I/O, timing, mask, and score remain unchanged; Genesis observations
 and material semantics are not portable.
 
+
+The companion Newton driver now completed a local initialization study: the
+100 kPa baseline plus four fresh Newton-native candidates, all valid in the
+fixed `0.25 ms`, `8/16` domain. The best (`E=116.7 kPa`, `nu=0.1955`,
+`mu=0.4409`) improves the objective from `12.698` to `11.610 mm`. This is a
+small local inference experiment, not optimizer convergence, calibrated
+prediction, or an NVS-to-decision demonstration.
+
 Detailed operational rules live in
 [`tera_splat/docs/chrono-oracle-run-contract.md`](../../tera_splat/docs/chrono-oracle-run-contract.md).

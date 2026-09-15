@@ -512,3 +512,14 @@ All three levels pass preparation, finite/full-mask I/O, guide, and strict
 zero-center-penetration gates. This qualifies a fixed, public Newton
 simulation domain for a separate sim-only BayesOpt study, not the 100 kPa
 smoke material as a calibration or a predictive real-sand model.
+
+
+### Local Newton BayesOpt initialization (2026-09-15)
+
+The companion local driver uses fresh candidate preparation plus a separate
+fresh continuous response rather than a restart. One baseline and four new
+candidates all passed candidate preparation and response mechanics. The best
+current candidate is `E=116.7 kPa`, `nu=0.1955`, `mu=0.4409`, objective
+`11.610 mm` (`3.502 mm` loaded; `16.216 mm` residual-footprint), compared with
+`12.698 mm` baseline. It is an initial five-observation result awaiting an
+independent replay and further proposal/repeatability evidence.
