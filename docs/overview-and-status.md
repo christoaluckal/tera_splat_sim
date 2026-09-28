@@ -238,12 +238,25 @@ oracle, I/O, timing, mask, and score remain unchanged; Genesis observations
 and material semantics are not portable.
 
 
-The companion Newton driver now completed a local initialization study: the
-100 kPa baseline plus four fresh Newton-native candidates, all valid in the
-fixed `0.25 ms`, `8/16` domain. The best (`E=116.7 kPa`, `nu=0.1955`,
-`mu=0.4409`) improves the objective from `12.698` to `11.610 mm`. This is a
-small local inference experiment, not optimizer convergence, calibrated
-prediction, or an NVS-to-decision demonstration.
+The companion Newton driver has completed 21 fixed-domain candidate
+evaluations, producing 19 mechanics-valid Newton-native observations. The two
+candidates at `mu≈0.273` were rejected by the unchanged strict zero
+particle-center penetration gate and were not used as surrogate observations.
+The best broad-continuation point (`E=70.46 kPa`, `nu=0.237231507`,
+`mu=0.305497980`) scores `8.823 mm` versus the `12.698 mm` baseline; a fresh
+exact replay scores `8.815 mm` (a `0.008 mm` difference). This demonstrates
+repeatable local objective improvement only—not optimizer convergence,
+calibrated prediction, held-out action transfer, or an NVS-to-decision
+demonstration.
+
+The first frozen 3 kg A1 action is time-aligned: the runners now derive and
+assert A1's `2.417 s` loaded time and `0.25 s` residual duration. The unchanged
+100 kPa control passes all mechanics gates and scores `16.289 mm`, while the
+1.5 kg-selected incumbent fails strict zero particle-center penetration (31
+centers; `1.332 um` maximum) and has no valid transfer score. Thus this public
+Newton domain can execute A1, but the selected material is not a usable 3 kg
+forward-model candidate. That is bounded material/action-transfer evidence,
+not calibration or an NVS-to-decision demonstration.
 
 Detailed operational rules live in
 [`tera_splat/docs/chrono-oracle-run-contract.md`](../../tera_splat/docs/chrono-oracle-run-contract.md).

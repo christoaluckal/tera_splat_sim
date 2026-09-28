@@ -196,11 +196,17 @@ names and evidence namespaces explicit.
 The active Newton route no longer promotes private activation overrides. Stock
 contact at `7.8125 mm` with public `8/16` coupling now passes its complete
 three-level response matrix, while the earlier `4/8` variants remain
-diagnostic failures. The isolated fixed-domain local runner is implemented and
-has five valid observations. Next, independently replay the current `11.610 mm`
-best candidate before adding proposals; only then assess whether the inferred
-material/map outputs are useful for a pre-traversal decision. NVS geometry
-integration remains a separate unstarted validation step.
+diagnostic failures. The isolated fixed-domain local runner has 19 valid
+observations from 21 candidate evaluations. Its best candidate (`E=70.46 kPa`,
+`nu=0.237231507`, `mu=0.305497980`) improved from `12.698` to `8.823 mm` and
+replayed at `8.815 mm`. The 3 kg action now has an explicit, validated timing
+contract (`2.417 s` loaded, `0.25 s` residual). Its unchanged 100 kPa baseline
+is mechanics-valid (`16.289 mm`), whereas the selected incumbent fails strict
+penetration and has no transfer score. Next, define a lower-severity or
+alternative frozen rigid action within the incumbent's mechanics-admissible
+domain, then compare it with the baseline without retuning. Only valid,
+time-aligned action comparisons can support a pre-traversal decision. NVS
+geometry integration remains a separate unstarted validation step.
 
 ## Priority 6: Gaussian scene deformation
 

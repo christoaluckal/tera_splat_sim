@@ -4,6 +4,10 @@ This directory is the canonical documentation set for the current repository.
 It separates implemented behavior from historical results and proposed future
 work. Start here instead of treating every root-level Markdown file as current.
 
+For the active cross-repository Newton sim-only handoff, use the companion
+[Newton handoff note](../../tera_splat/docs/newton-handoff.md) before opening
+large output trees or historical Genesis documents.
+
 ## System in one paragraph
 
 The repository uses PyChrono 8 for stationary support trials on a central SCM
@@ -43,7 +47,7 @@ crossing while a synchronized DEM shows `current - initial` elevation.
 | Articulated Chrono leg dynamics | Not implemented |
 | ROS 2 command bridge | Not implemented |
 | Genesis MPM bridge | 5 mm oracle, n128 preparation, fixed-time BayesOpt, replayed `8.704 mm` incumbent, and raw comparison verified; same-state diagnostics localize the failed n128/0.125 ms level to timestep-dependent free-surface uplift, so preparation and response convergence remain |
-| Newton MPM alternative | Fixed public `7.8125 mm`, `0.25 ms`, stock-contact `8/16` domain now has five valid local BayesOpt observations; best is `11.610 mm` versus `12.698 mm` baseline, pending replay and not a calibrated/NVS result |
+| Newton MPM alternative | Fixed public `7.8125 mm`, `0.25 ms`, stock-contact `8/16` domain has 19 valid local material observations; replayed best is `8.815 mm` versus `12.698 mm` baseline. At aligned 3 kg timing, the 100 kPa control is valid (`16.289 mm`) but the selected incumbent fails strict penetration, so it does not transfer as a usable high-load candidate |
 | Gaussian transfer | Proposed only |
 | Rigid offset hazard and reduced-order fall | Implemented |
 | Rigid difficult terrain with completion and trunk tilt | Implemented approximation |

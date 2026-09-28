@@ -514,12 +514,37 @@ simulation domain for a separate sim-only BayesOpt study, not the 100 kPa
 smoke material as a calibration or a predictive real-sand model.
 
 
-### Local Newton BayesOpt initialization (2026-09-15)
+### Local Newton material-study campaign (through 2026-09-21)
 
 The companion local driver uses fresh candidate preparation plus a separate
-fresh continuous response rather than a restart. One baseline and four new
-candidates all passed candidate preparation and response mechanics. The best
-current candidate is `E=116.7 kPa`, `nu=0.1955`, `mu=0.4409`, objective
-`11.610 mm` (`3.502 mm` loaded; `16.216 mm` residual-footprint), compared with
-`12.698 mm` baseline. It is an initial five-observation result awaiting an
-independent replay and further proposal/repeatability evidence.
+fresh continuous response rather than a restart. It has executed 21 candidates
+in the fixed `0.25 ms`, `8/16` domain: 19 passed candidate preparation and
+response mechanics and are valid observations. Two low-friction extension
+candidates (`mu≈0.273`) failed the strict zero particle-center penetration gate
+and are excluded from the study observations.
+
+The broad-continuation incumbent is `E=70.46 kPa`, `nu=0.237231507`,
+`mu=0.305497980`, objective `8.823 mm` (`2.643 mm` loaded;
+`12.360 mm` residual-footprint), compared with the `12.698 mm` baseline. Its
+fresh independent replay scored `8.815 mm` (`2.641 mm` loaded;
+`12.348 mm` residual-footprint), a `0.008 mm` difference. This confirms local
+repeatability, not optimizer convergence, calibrated material inference, or
+held-out/NVS decision utility.
+
+### Time-aligned 3 kg held-out result (2026-09-28)
+
+A frozen 3 kg guided A1 Chrono episode has identical initial terrain, geometry,
+center, guide, grid, and recovery contract to A0; its 14,161-cell initial map
+is exactly equal. The runners now derive, pass, record, and assert the A1
+manifest timing, so both comparisons use `2.417 s` loaded and `0.25 s`
+residual.
+
+The unchanged 100 kPa baseline passes all preparation and response mechanics
+gates, including strict zero particle-center penetration, and scores
+`16.289 mm` (`4.884 mm` loaded; `22.810 mm` residual-footprint). The selected
+1.5 kg incumbent (`E=70.46 kPa`, `nu=0.237231507`, `mu=0.305497980`) passes
+preparation but fails strict penetration (31 sampled centers; `1.332 um`
+maximum), so it has no valid objective. The fixed public Newton domain supports
+this 3 kg action, but the selected material does not transfer as an admissible
+high-load candidate. This is neither calibration nor a broad generalization or
+NVS-decision claim.

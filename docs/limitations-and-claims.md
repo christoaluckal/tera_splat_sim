@@ -151,10 +151,21 @@ initial surface. The result has no real-sand validation, is not transferable to
 untested solver settings, and cannot merge Genesis state or observations.
 
 
-A local five-observation Newton study improves its numerical objective from
-`12.698` to `11.610 mm`, but this is not optimizer convergence, an independent
-best-point replay, calibrated material inference, or evidence that NVS-derived
-geometry supports a pre-traversal decision.
+A local Newton study now has 19 mechanics-valid observations from 21 candidate
+evaluations. Its best point improves the numerical objective from `12.698` to
+`8.823 mm`, and an independent fresh replay scores `8.815 mm` (`0.008 mm`
+difference). This is repeatable in-domain objective evidence, not optimizer
+convergence, calibrated material inference, held-out action transfer, or
+evidence that NVS-derived geometry supports a pre-traversal decision.
+
+The first 3 kg held-out action is now time-aligned and gives a bounded negative
+result for the selected material. Although A1's initial map exactly matches A0,
+the selected incumbent fails the strict penetration gate (31 centers,
+`1.332 um` maximum) and has no valid score; the unchanged 100 kPa baseline is
+valid at the same `2.417 s`/`0.25 s` timing and scores `16.289 mm`. This shows
+the selected material does not transfer as a mechanically usable 3 kg
+candidate; it does not establish calibrated material properties, a broad
+high-load failure of Newton, or NVS-supported decision utility.
 
 ### Smoke grid is coarse
 
