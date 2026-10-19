@@ -167,6 +167,32 @@ the selected material does not transfer as a mechanically usable 3 kg
 candidate; it does not establish calibrated material properties, a broad
 high-load failure of Newton, or NVS-supported decision utility.
 
+### The 35 mm residual pilot has a separate bounded admission gate
+
+> Historical only. The 2026-10-17 fresh campaign does not reuse the episodes,
+> particle beds, preparations, responses, or thresholds described in this
+> subsection. Its active contract is the
+> [fresh hierarchical protocol](../../tera_splat/docs/newton/fresh-hierarchical-phase0-20261017.md).
+
+The 35 mm proxy does not inherit the historical cylinder's strict mechanics
+qualification. Its centered 31 N response fails zero center penetration at
+`0.5`, `0.25`, and `0.125 ms`, and its sinkage is not timestep-converged. The
+strict result remains failed.
+
+For offline residual-pilot data only, frozen policy
+`bounded_static_prior_v2_20261016` admits a Newton rollout when preparation,
+finite state, guide, and support pass; the loaded observation has zero center
+overlap; and trajectory-only overlap is no deeper than 10 micrometers and
+affects no more than 0.02% of particles. Centered 31 N and 46 N satisfy that
+policy. Centered 61 N does not: 38 centers remain inside at the loaded
+observation. The retained domain is therefore five positions at 31/46 N.
+
+This is an engineering data-admission rule, not strict mechanics, timestep
+convergence, material calibration, Gaussian fidelity, or planner validation.
+The tolerance is frozen before every non-center Newton result and must not be
+relaxed to admit a later failure. See the companion
+[bounded admission report](../../tera_splat/docs/newton/coarse-prior-admission-20261016.md).
+
 ### Smoke grid is coarse
 
 The reference traversal uses `35 mm` spacing. This is useful for visualization

@@ -5,8 +5,9 @@ Last updated: 2026-10-04
 The canonical cross-repository ledger lives with the joined Newton-evaluation
 artifacts:
 
-* [Chrono-to-Newton historical evidence](../../tera_splat/docs/historical-forward-model-evidence-20261004.md)
-* [Current operational state](../../tera_splat/docs/forward-model-current-state-20261004.md)
+* [Chrono-to-Newton historical evidence](../../tera_splat/docs/newton/historical-evidence-20261004.md)
+* [Current Newton handoff](../../tera_splat/docs/newton/handoff.md)
+* [Newton running analysis](../../tera_splat/docs/newton/running-analysis.md)
 
 For each new Chrono episode, preserve its manifest, accepted timing, geometry,
 support mask, initial/loaded/residual heightfields, and qualification gates.

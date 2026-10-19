@@ -4,7 +4,12 @@ import argparse
 from datetime import datetime
 from pathlib import Path
 
-from quick_support_demo.chrono_demo.cylinder_episode import CylinderAction, run_cylinder_episode
+from quick_support_demo.chrono_demo.cylinder_episode import (
+    CYLINDER_HEIGHT_M,
+    CYLINDER_RADIUS_M,
+    CylinderAction,
+    run_cylinder_episode,
+)
 from quick_support_demo.config import PROJECT_ROOT
 
 
@@ -13,6 +18,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--episode-id", default="A0_cal")
     parser.add_argument("--mass-kg", type=float, default=1.5)
     parser.add_argument("--xy", type=float, nargs=2, default=(0.0, 0.0), metavar=("X_M", "Y_M"))
+    parser.add_argument(
+        "--radius-m",
+        type=float,
+        default=CYLINDER_RADIUS_M,
+        help="Action-cylinder radius; use 0.035 for the initial Go1 foot proxy.",
+    )
+    parser.add_argument(
+        "--height-m",
+        type=float,
+        default=CYLINDER_HEIGHT_M,
+        help="Action-cylinder height; use 0.035 for the initial Go1 foot proxy.",
+    )
     parser.add_argument("--smoke", action="store_true", help="Use the coarse SCM grid for plumbing only.")
     parser.add_argument("--timestep-s", type=float, default=None, help="Override the Chrono integration timestep.")
     parser.add_argument(
@@ -101,6 +118,8 @@ def main() -> None:
             args.episode_id,
             args.mass_kg,
             (float(args.xy[0]), float(args.xy[1])),
+            radius_m=float(args.radius_m),
+            height_m=float(args.height_m),
             start_clearance_m=float(args.start_clearance_m),
         ),
         smoke=args.smoke,

@@ -548,3 +548,33 @@ maximum), so it has no valid objective. The fixed public Newton domain supports
 this 3 kg action, but the selected material does not transfer as an admissible
 high-load candidate. This is neither calibration nor a broad generalization or
 NVS-decision claim.
+
+### Static 35 mm bounded-pilot boundary (2026-10-16)
+
+> Historical only. These results are not admissible in the current fresh
+> campaign and cannot be used for qualification, residual training, validation,
+> or test scores. See the
+> [fresh hierarchical protocol](../../tera_splat/docs/newton/fresh-hierarchical-phase0-20261017.md).
+
+The first robot-foot proxy uses a 35 mm radius and the unchanged 100 kPa
+Newton control at the public `7.8125 mm`, `0.25 ms`, stock-contact `8/16`
+setting. The centered 31 N timestep matrix fails strict zero particle-center
+penetration at every level and changes loaded sinkage by several millimeters.
+It is neither strictly mechanics-qualified nor response-converged.
+
+A separate, frozen coarse-prior gate permits residual-pilot data only with
+accepted preparation, finite/full-support maps, a passed guide, zero overlap at
+the loaded observation, at most 10 micrometers transient overlap, and at most
+0.02% affected particles. Centered 31 N and 46 N pass this bounded gate while
+remaining strict failures; their loaded/residual Chrono RMSE is
+`0.835/0.683 mm` and `1.719/1.411 mm`. Centered 61 N is rejected because 38
+particle centers remain inside at the loaded observation, despite remaining
+within the depth and fraction limits.
+
+The resulting prospective matrix has 10 actions: center and plus/minus x at
+31/46 N for training, plus y at both loads for validation, and minus y at both
+loads for test. Residual training remains prohibited until all 10 Chrono
+oracles exist, all 10 fixed Newton rollouts pass the bounded gate, H0 is
+identical, and the whole-episode split remains frozen. This boundary and its
+artifacts are indexed by the companion
+[bounded admission report](../../tera_splat/docs/newton/coarse-prior-admission-20261016.md).

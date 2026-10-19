@@ -172,10 +172,19 @@ def _write_episode(
     action_data = asdict(action)
     action_data["geometry"] = "right_circular_cylinder"
     action_data["gravity_mps2"] = list(world_cfg["world"]["gravity_mps2"])
+    gravity_z = abs(float(world_cfg["world"]["gravity_mps2"][2]))
+    normal_force_n = float(action.mass_kg) * gravity_z
+    action_data["load_mode"] = "static_gravity_equivalent_mass"
+    action_data["normal_force_n"] = normal_force_n
+    action_data["nominal_pressure_pa"] = normal_force_n / (
+        np.pi * float(action.radius_m) ** 2
+    )
     with (output_dir / "action.json").open("w", encoding="utf-8") as file:
         json.dump(action_data, file, indent=2)
 
     loaded_row = next(row for row in reversed(pose_rows) if row["phase"] == "loaded")
+    loaded_delta = loaded_heightmap - initial_heightmap
+    residual_delta = residual_heightmap - initial_heightmap
     metrics = {
         "loaded_termination_reason": loaded_reason,
         "loaded_sinkage_m": float(pose_rows[0]["z_m"]) - float(loaded_row["z_m"]),
@@ -183,8 +192,11 @@ def _write_episode(
         "loaded_angular_speed_radps": float(loaded_row["angular_speed_radps"]),
         "loaded_convergence": loading_convergence,
         "residual_recovery": {"fixed_duration_s": float(residual_settle_s)},
-        "max_loaded_depression_m": float(np.min(loaded_heightmap - initial_heightmap)),
-        "max_residual_depression_m": float(np.min(residual_heightmap - initial_heightmap)),
+        "heightmap_metric_scope": "valid interior; one-cell SCM boundary ring excluded",
+        "max_loaded_depression_m": float(np.min(loaded_delta[valid_mask])),
+        "max_residual_depression_m": float(np.min(residual_delta[valid_mask])),
+        "all_cell_min_loaded_delta_m": float(np.min(loaded_delta)),
+        "all_cell_min_residual_delta_m": float(np.min(residual_delta)),
     }
     with (output_dir / "metrics.json").open("w", encoding="utf-8") as file:
         json.dump(metrics, file, indent=2)
@@ -261,6 +273,12 @@ def run_cylinder_episode(
     capture_interval_s: float | None = None,
     vertical_guide: bool = False,
 ) -> dict:
+    if action.mass_kg <= 0.0:
+        raise ValueError("action mass_kg must be positive")
+    if action.radius_m <= 0.0 or action.height_m <= 0.0:
+        raise ValueError("action radius_m and height_m must be positive")
+    if action.start_clearance_m < 0.0:
+        raise ValueError("action start_clearance_m must be non-negative")
     cfg = load_demo_config()
     world_cfg = cfg["world"]
     terrain_cfg = cfg["terrain"]
