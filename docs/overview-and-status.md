@@ -148,20 +148,12 @@ median vertical displacement changes from `-3.135` to `+2.555 mm`.
 
 ## Current interpretation
 
-As of 2026-10-17, the prior 35 mm outputs listed below are historical
-diagnostics only. They cannot qualify, train, validate, or test the current
-fresh campaign. Current matrix counts are 6/15 complete Chrono and 6/15 usable
-Newton. The completed centered-31 N duplicates characterize same-build
-variation, and all three canonical 31 N training positions pass local-skill
-gates. The first five-position spatial rung is now complete at 5/5; exact equality is not
-required. The residual pilot was frozen before +y validation and -y test
-generation (model SHA-256 `242fa879...15af`). It improves all four local
-metrics on untouched +y validation and -y test, completing the single-load
-spatial rung. Multiple-load evidence remains pending.
-The centered 46 N training action is also usable and retains positive local
-skill, putting that rung at 1/5.
-See the
-[fresh hierarchical protocol](../../tera_splat/docs/newton/fresh-hierarchical-phase0-20261017.md).
+The prior 35 mm outputs listed below are historical diagnostics only. They
+cannot qualify, train, validate, or test the fresh campaign. The companion
+[authoritative Phase 0](../../tera_splat/docs/newton/phase0.md) owns all live
+counts, sequencing locks, chronological evidence, and claims. The
+[fresh hierarchical protocol](../../tera_splat/docs/newton/fresh-hierarchical-phase0-20261017.md)
+is the frozen campaign design.
 
 Verified:
 
@@ -287,6 +279,7 @@ not calibration or an NVS-to-decision demonstration.
 
 Detailed operational rules live in
 [`tera_splat/docs/chrono-oracle-run-contract.md`](../../tera_splat/docs/chrono-oracle-run-contract.md).
-The active 35 mm residual-pilot boundary lives in the
+The active 35 mm campaign boundary and next work live in
+[authoritative Phase 0](../../tera_splat/docs/newton/phase0.md). The
 [bounded admission report](../../tera_splat/docs/newton/coarse-prior-admission-20261016.md)
-and the [current Newton handoff](../../tera_splat/docs/newton/handoff.md).
+is historical provenance only.

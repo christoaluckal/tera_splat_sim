@@ -554,7 +554,8 @@ NVS-decision claim.
 > Historical only. These results are not admissible in the current fresh
 > campaign and cannot be used for qualification, residual training, validation,
 > or test scores. See the
-> [fresh hierarchical protocol](../../tera_splat/docs/newton/fresh-hierarchical-phase0-20261017.md).
+> [authoritative Phase 0](../../tera_splat/docs/newton/phase0.md) and its linked
+> frozen protocol.
 
 The first robot-foot proxy uses a 35 mm radius and the unchanged 100 kPa
 Newton control at the public `7.8125 mm`, `0.25 ms`, stock-contact `8/16`

@@ -172,7 +172,8 @@ high-load failure of Newton, or NVS-supported decision utility.
 > Historical only. The 2026-10-17 fresh campaign does not reuse the episodes,
 > particle beds, preparations, responses, or thresholds described in this
 > subsection. Its active contract is the
-> [fresh hierarchical protocol](../../tera_splat/docs/newton/fresh-hierarchical-phase0-20261017.md).
+> [authoritative Phase 0](../../tera_splat/docs/newton/phase0.md), which links
+> the frozen protocol.
 
 The 35 mm proxy does not inherit the historical cylinder's strict mechanics
 qualification. Its centered 31 N response fails zero center penetration at

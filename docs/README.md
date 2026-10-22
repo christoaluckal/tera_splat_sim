@@ -5,17 +5,16 @@ It separates implemented behavior from historical results and proposed future
 work. Start here instead of treating every root-level Markdown file as current.
 
 For the active cross-repository work, start with the companion
+[authoritative Phase 0](../../tera_splat/docs/newton/phase0.md), then the
 [hybrid model design](../../tera_splat/docs/hybrid-chrono-mpm-residual-gaussian-planning-20261008.md)
 and [Newton documentation index](../../tera_splat/docs/newton/README.md) before
 opening large output trees or historical Genesis documents.
 
-The current static 35 mm campaign is the companion
+The 35 mm campaign's frozen design is the
 [fresh hierarchical Phase 0 protocol](../../tera_splat/docs/newton/fresh-hierarchical-phase0-20261017.md).
-It starts with zero admissible cases. Sequential fresh repeats characterize
-same-build numerical variation; bitwise identity is diagnostic and does not
-block matrix expansion. No earlier Chrono episode, particle bed, MPM
-preparation, or response may be reused as current evidence or training data.
-Earlier reports remain historical failure-mode context only.
+Live counts, sequencing locks, and claims belong only in the authoritative
+Phase 0 document. No earlier Chrono episode, particle bed, MPM preparation, or
+response may be reused as current evidence or training data.
 
 ## System in one paragraph
 
@@ -56,7 +55,7 @@ crossing while a synchronized DEM shows `current - initial` elevation.
 | Articulated Chrono leg dynamics | Not implemented |
 | ROS 2 command bridge | Not implemented |
 | Genesis MPM bridge | 5 mm oracle, n128 preparation, fixed-time BayesOpt, replayed `8.704 mm` incumbent, and raw comparison verified; same-state diagnostics localize the failed n128/0.125 ms level to timestep-dependent free-surface uplift, so preparation and response convergence remain |
-| Newton MPM alternative | Fresh matrix: 6/15 complete Chrono and 6/15 usable Newton cases. Frozen v1 improves every local metric on untouched 31 N +y/-y; centered 46 N retains positive coarse-prior skill and begins the separately versioned two-load expansion (1/5) |
+| Newton MPM alternative | Active fresh Phase 0; see the companion authoritative ledger for current counts, sequencing, and claims |
 | Gaussian transfer | Proposed only |
 | Rigid offset hazard and reduced-order fall | Implemented |
 | Rigid difficult terrain with completion and trunk tilt | Implemented approximation |
