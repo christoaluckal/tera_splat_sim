@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 import numpy as np
 
 from .chrono_import import import_chrono
@@ -7,6 +9,33 @@ from .difficult_terrain import RollingCourse, build_rolling_mesh
 
 
 chrono, veh = import_chrono()
+
+
+@dataclass(frozen=True)
+class ArrayHeightCourse:
+    """Exact metric-grid heightfield used to initialize an SCM mesh."""
+
+    heightmap_m: np.ndarray
+    size_x_m: float
+    size_y_m: float
+
+    def heightmap(self, terrain_cfg: dict) -> np.ndarray:
+        spacing = float(terrain_cfg["pit"]["grid_spacing_m"])
+        size_x, size_y = (float(value) for value in terrain_cfg["pit"]["size_m"])
+        expected = (
+            int(round(size_y / spacing)) + 1,
+            int(round(size_x / spacing)) + 1,
+        )
+        value = np.asarray(self.heightmap_m, dtype=np.float32)
+        if value.shape != expected:
+            raise ValueError(
+                f"initial heightmap shape {value.shape} does not match SCM grid {expected}"
+            )
+        if not np.isfinite(value).all():
+            raise ValueError("initial heightmap contains non-finite values")
+        if not np.isclose(size_x, self.size_x_m) or not np.isclose(size_y, self.size_y_m):
+            raise ValueError("initial heightmap footprint does not match SCM pit size")
+        return value.copy()
 
 
 def _set_scm_reference_frame(terrain: object, frame: object) -> None:

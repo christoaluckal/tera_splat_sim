@@ -5,6 +5,7 @@ import unittest
 import numpy as np
 
 from quick_support_demo.chrono_demo.build_scm_pit import (
+    ArrayHeightCourse,
     SCMHeightCourse,
     build_rolling_scm_pit,
     build_scm_pit,
@@ -129,6 +130,19 @@ class DifficultTerrainTest(unittest.TestCase):
         heightmap = sample_heightmap(terrain, config["terrain"])
 
         np.testing.assert_allclose(heightmap, 0.0, atol=1.0e-7)
+
+    def test_array_height_course_requires_exact_metric_grid(self) -> None:
+        config = {"pit": {"size_m": [0.6, 0.6], "grid_spacing_m": 0.005}}
+        values = np.zeros((121, 121), dtype=np.float32)
+        course = ArrayHeightCourse(values, 0.6, 0.6)
+
+        np.testing.assert_array_equal(course.heightmap(config), values)
+        with self.assertRaisesRegex(ValueError, "does not match SCM grid"):
+            ArrayHeightCourse(values[:-1], 0.6, 0.6).heightmap(config)
+        invalid = values.copy()
+        invalid[5, 5] = np.nan
+        with self.assertRaisesRegex(ValueError, "non-finite"):
+            ArrayHeightCourse(invalid, 0.6, 0.6).heightmap(config)
 
 
 if __name__ == "__main__":

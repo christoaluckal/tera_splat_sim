@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+import hashlib
 import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -10,7 +11,13 @@ import yaml
 
 from quick_support_demo.config import load_demo_config
 
-from .build_scm_pit import build_scm_pit, sample_heightmap
+from .build_scm_pit import (
+    ArrayHeightCourse,
+    SCMHeightCourse,
+    build_rolling_scm_pit,
+    build_scm_pit,
+    sample_heightmap,
+)
 from .build_world import add_perimeter_floor, build_system, make_contact_material
 from .chrono_import import import_chrono
 
@@ -56,6 +63,16 @@ def _heightmap_coordinates(terrain_cfg: dict) -> tuple[np.ndarray, np.ndarray]:
     xs = np.arange(-0.5 * size_x, 0.5 * size_x + 0.5 * spacing, spacing)
     ys = np.arange(-0.5 * size_y, 0.5 * size_y + 0.5 * spacing, spacing)
     return xs, ys
+
+
+def _heightmap_sha256(value: np.ndarray) -> str:
+    array = np.ascontiguousarray(np.asarray(value, dtype="<f4"))
+    descriptor = json.dumps(
+        {"dtype": str(array.dtype), "shape": list(array.shape)},
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return hashlib.sha256(descriptor + b"\0" + array.tobytes()).hexdigest()
 
 
 def _build_cylinder(system: object, action: CylinderAction, surface_z_m: float) -> object:
@@ -157,6 +174,7 @@ def _write_episode(
     residual_settle_s: float,
     smoke: bool,
     vertical_guide: bool,
+    initial_surface_metadata: dict | None = None,
     terrain_snapshots: list[tuple[dict[str, float | str | None], np.ndarray]] | None = None,
 ) -> None:
     xs, ys = _heightmap_coordinates(terrain_cfg)
@@ -232,6 +250,7 @@ def _write_episode(
             "residual_recovery": {"fixed_duration_s": float(residual_settle_s)},
             "soil_parameters": terrain_cfg["soil"],
         },
+        "initial_surface": initial_surface_metadata or {"mode": "flat_scm_plane"},
     }
     with (output_dir / "manifest.yaml").open("w", encoding="utf-8") as file:
         yaml.safe_dump(manifest, file, sort_keys=False)
@@ -272,6 +291,8 @@ def run_cylinder_episode(
     scm_pit_size_m: tuple[float, float] | None = None,
     capture_interval_s: float | None = None,
     vertical_guide: bool = False,
+    initial_heightmap_m: np.ndarray | None = None,
+    soil_parameter_overrides: dict[str, float] | None = None,
 ) -> dict:
     if action.mass_kg <= 0.0:
         raise ValueError("action mass_kg must be positive")
@@ -299,6 +320,15 @@ def run_cylinder_episode(
         if timestep_s <= 0.0:
             raise ValueError("timestep_s must be positive")
         world_cfg["world"]["timestep_s"] = float(timestep_s)
+    if soil_parameter_overrides is not None:
+        unknown = sorted(set(soil_parameter_overrides) - set(terrain_cfg["soil"]))
+        if unknown:
+            raise ValueError(f"unknown SCM soil parameter overrides: {unknown}")
+        for name, raw_value in soil_parameter_overrides.items():
+            value = float(raw_value)
+            if not np.isfinite(value):
+                raise ValueError(f"SCM soil parameter {name} must be finite")
+            terrain_cfg["soil"][name] = value
     if settle_time_s is not None and max_loading_time_s is not None:
         raise ValueError("settle_time_s and max_loading_time_s are aliases; supply only one")
     if settle_time_s is not None:
@@ -323,9 +353,38 @@ def run_cylinder_episode(
         raise ValueError("capture_interval_s must be positive")
     system = build_system(world_cfg)
     add_perimeter_floor(system, world_cfg, terrain_cfg)
-    terrain = build_scm_pit(system, terrain_cfg, visualization_mesh=False)
+    initial_surface_metadata = None
+    if initial_heightmap_m is None:
+        terrain = build_scm_pit(system, terrain_cfg, visualization_mesh=False)
+    else:
+        requested_surface = np.asarray(initial_heightmap_m, dtype=np.float32)
+        size_x, size_y = (float(value) for value in terrain_cfg["pit"]["size_m"])
+        course = ArrayHeightCourse(requested_surface, size_x, size_y)
+        # Validate shape and finiteness before constructing native Chrono state.
+        course.heightmap(terrain_cfg)
+        terrain = build_rolling_scm_pit(
+            system,
+            terrain_cfg,
+            course,
+            visualization_mesh=False,
+        )
+        initial_surface_metadata = {
+            "mode": "mesh_initialized_metric_heightmap",
+            "requested_array_sha256": _heightmap_sha256(requested_surface),
+            "requested_shape": list(requested_surface.shape),
+        }
     initial_heightmap = sample_heightmap(terrain, terrain_cfg)
-    cylinder = _build_cylinder(system, action, float(terrain_cfg["pit"]["top_elevation_m"]))
+    if initial_surface_metadata is not None:
+        initial_surface_metadata["sampled_array_sha256"] = _heightmap_sha256(initial_heightmap)
+        initial_surface_metadata["sampled_max_abs_error_m"] = float(
+            np.max(np.abs(initial_heightmap - requested_surface))
+        )
+    local_surface = SCMHeightCourse(
+        terrain,
+        tuple(float(value) for value in terrain_cfg["pit"]["size_m"]),
+        outside_height_m=float(terrain_cfg["pit"]["top_elevation_m"]),
+    ).height_at(float(action.center_xy_m[0]), float(action.center_xy_m[1]))
+    cylinder = _build_cylinder(system, action, local_surface)
     guide, guide_body = _add_vertical_guide(system, terrain, cylinder, action) if vertical_guide else (None, None)
 
     dt = float(world_cfg["world"]["timestep_s"])
@@ -478,6 +537,7 @@ def run_cylinder_episode(
         residual_settle_s,
         smoke,
         vertical_guide,
+        initial_surface_metadata,
         terrain_snapshots,
     )
     return {

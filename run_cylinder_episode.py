@@ -4,6 +4,8 @@ import argparse
 from datetime import datetime
 from pathlib import Path
 
+import numpy as np
+
 from quick_support_demo.chrono_demo.cylinder_episode import (
     CYLINDER_HEIGHT_M,
     CYLINDER_RADIUS_M,
@@ -100,6 +102,21 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Constrain the cylinder to vertical translation while it settles under gravity.",
     )
+    parser.add_argument(
+        "--initial-heightmap-npy",
+        type=Path,
+        help="Metric initial SCM heightfield on the configured pit grid.",
+    )
+    parser.add_argument(
+        "--bekker-kphi",
+        type=float,
+        help="Override the Chrono SCM Bekker kphi value for this episode.",
+    )
+    parser.add_argument(
+        "--mohr-friction-deg",
+        type=float,
+        help="Override the Chrono SCM Mohr friction angle for this episode.",
+    )
     parser.add_argument("--output-dir", type=Path, default=None)
     return parser.parse_args()
 
@@ -112,6 +129,19 @@ def main() -> None:
         / "chrono_episodes"
         / f"{args.episode_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
     )
+    initial_heightmap = (
+        np.load(args.initial_heightmap_npy.resolve(), allow_pickle=False)
+        if args.initial_heightmap_npy is not None
+        else None
+    )
+    soil_overrides = {
+        name: value
+        for name, value in {
+            "bekker_kphi": args.bekker_kphi,
+            "mohr_friction_deg": args.mohr_friction_deg,
+        }.items()
+        if value is not None
+    }
     result = run_cylinder_episode(
         output_dir=output_dir,
         action=CylinderAction(
@@ -135,6 +165,8 @@ def main() -> None:
         residual_settle_s=args.residual_settle_s,
         capture_interval_s=args.capture_interval_s,
         vertical_guide=args.vertical_guide,
+        initial_heightmap_m=initial_heightmap,
+        soil_parameter_overrides=soil_overrides,
     )
     print(result["output_dir"])
     print(f"loaded_termination_reason: {result['loaded_termination_reason']}")
