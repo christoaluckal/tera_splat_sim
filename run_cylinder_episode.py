@@ -113,9 +113,39 @@ def parse_args() -> argparse.Namespace:
         help="Override the Chrono SCM Bekker kphi value for this episode.",
     )
     parser.add_argument(
+        "--bekker-kc",
+        type=float,
+        help="Override the Chrono SCM Bekker kc value for this episode.",
+    )
+    parser.add_argument(
+        "--bekker-n",
+        type=float,
+        help="Override the Chrono SCM Bekker sinkage exponent for this episode.",
+    )
+    parser.add_argument(
+        "--mohr-cohesion-pa",
+        type=float,
+        help="Override the Chrono SCM Mohr cohesion in Pa for this episode.",
+    )
+    parser.add_argument(
         "--mohr-friction-deg",
         type=float,
         help="Override the Chrono SCM Mohr friction angle for this episode.",
+    )
+    parser.add_argument(
+        "--janosi-shear-m",
+        type=float,
+        help="Override the Chrono SCM Janosi shear length in m for this episode.",
+    )
+    parser.add_argument(
+        "--elastic-k-pa-per-m",
+        type=float,
+        help="Override the Chrono SCM elastic stiffness in Pa/m for this episode.",
+    )
+    parser.add_argument(
+        "--damping-r-pa-s-per-m",
+        type=float,
+        help="Override the Chrono SCM vertical damping in Pa s/m for this episode.",
     )
     parser.add_argument("--output-dir", type=Path, default=None)
     return parser.parse_args()
@@ -138,7 +168,13 @@ def main() -> None:
         name: value
         for name, value in {
             "bekker_kphi": args.bekker_kphi,
+            "bekker_kc": args.bekker_kc,
+            "bekker_n": args.bekker_n,
+            "mohr_cohesion": args.mohr_cohesion_pa,
             "mohr_friction_deg": args.mohr_friction_deg,
+            "janosi_shear_m": args.janosi_shear_m,
+            "elastic_k": args.elastic_k_pa_per_m,
+            "damping_r": args.damping_r_pa_s_per_m,
         }.items()
         if value is not None
     }
